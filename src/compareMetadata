@@ -1,0 +1,37 @@
+import {
+  combineMetadatas,
+  Metadata,
+  MetadataAttribute,
+  MetadataDiff,
+} from "./types";
+
+export const compareMetadata = (
+  first: Metadata,
+  second: Metadata
+): MetadataDiff => {
+  const valueDiff = compareMetadataValues(first, second);
+  const attributesDiff = compareMetadataAttributes(
+    first.attributes,
+    second.attributes
+  );
+
+  return combineMetadatas(valueDiff, attributesDiff);
+};
+
+const compareMetadataValues = (
+  first: Metadata,
+  second: Metadata
+): MetadataDiff => {
+  const diff: MetadataDiff = { changes: [] };
+
+  return diff;
+};
+
+const compareMetadataAttributes = (
+  first: MetadataAttribute[],
+  second: MetadataAttribute[]
+): MetadataDiff => {
+  const diff: MetadataDiff = { changes: [] };
+
+  return diff;
+};
