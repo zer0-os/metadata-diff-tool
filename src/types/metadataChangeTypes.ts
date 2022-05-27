@@ -37,14 +37,39 @@ export class MetadataChangeModifyAttribute implements MetadataChange {
   readonly new: string;
 }
 
-export class MetadataChangeModifyMember implements MetadataChange {
-  constructor(key: string, oldValue: string, newValue: string) {
+export class MetadataChangeAddMember<T> implements MetadataChange {
+  constructor(key: string, newValue: T) {
+    this.key = key;
+    this.new = newValue;
+  }
+
+  description = `Added a Member`;
+  key: string;
+  new: T;
+}
+
+export class MetadataChangeRemoveMember<T> implements MetadataChange {
+  constructor(key: string, oldValue: T) {
+    this.key = key;
+    this.old = oldValue;
+  }
+
+  description = `Removed a Member`;
+  key: string;
+  old: T;
+}
+
+export class MetadataChangeModifyMember<OldType, NewType>
+  implements MetadataChange
+{
+  constructor(key: string, oldValue: OldType, newValue: NewType) {
     this.key = key;
     this.old = oldValue;
     this.new = newValue;
   }
-  readonly description = "Modified a Member";
-  readonly key: string;
-  readonly old: string;
-  readonly new: string;
+
+  description = `Modified a Member`;
+  key: string;
+  old: OldType;
+  new: NewType;
 }

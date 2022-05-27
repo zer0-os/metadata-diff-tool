@@ -1,4 +1,4 @@
-import { compareMetadata } from "./compareMetadata";
+import { compareMetadata, compareMetadataGeneric } from "./compareMetadata";
 import { Metadata } from "./types";
 
 const oldData: Metadata = {
@@ -13,7 +13,7 @@ const oldData: Metadata = {
   name: "",
 };
 
-const newData: Metadata = {
+const newData = {
   animation_url: "",
   attributes: [
     { trait_type: "testAdd", value: "hello" },
@@ -23,13 +23,16 @@ const newData: Metadata = {
   description: "desc",
   image_full: "img_full",
   name: "name",
+  newMember: "newboi",
 };
 
 const main = () => {
   console.log("main");
 
   const diff = compareMetadata(oldData, newData);
+  const diffGeneric = compareMetadataGeneric(oldData, newData);
   console.log(diff);
+  console.log(diffGeneric);
 };
 
 main();
