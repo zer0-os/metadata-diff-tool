@@ -19,7 +19,8 @@
       "resolveJsonModule": true
     },
     "include": [
-      "src"
+      "src",
+      "data"
     ],
     "exclude": []
   }

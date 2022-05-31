@@ -2,6 +2,6 @@ import { Metadata } from "./metadata";
 
 export interface NFTData {
   domain?: string;
-  hexID: string;
-  data: Metadata;
+  id: string;
+  metadata: Metadata;
 }

@@ -1,4 +1,5 @@
-import { compareMetadata } from "./compareMetadata";
+import * as fs from "fs";
+import { compareMetadata, compareMetadataGeneric } from "./compareMetadata";
 import { NFTData, NFTDiff, NFTBatchDiff } from "./types";
 
 export const compareNFTs = (original: NFTData, modified: NFTData): NFTDiff => {
@@ -6,19 +7,19 @@ export const compareNFTs = (original: NFTData, modified: NFTData): NFTDiff => {
     throw Error(
       `Original NFT domain [${original.domain}] and modified NFT domain [${modified.domain}] do not match`
     );
-  } else if (original.hexID != modified.hexID) {
+  } else if (original.id != modified.id) {
     throw Error(
-      `Original NFT hexID [${original.hexID}] and modified NFT hexID [${modified.hexID}] do not match`
+      `Original NFT hexID [${original.id}] and modified NFT hexID [${modified.id}] do not match`
     );
   }
 
   const diff: NFTDiff = {
     domian: original.domain,
-    hexID: original.hexID,
+    id: original.id,
     changes: [],
   };
 
-  diff.changes = compareMetadata(original.data, modified.data);
+  diff.changes = compareMetadataGeneric(original.metadata, modified.metadata);
 
   return diff;
 };
@@ -31,19 +32,18 @@ export const compareNFTGroups = (
 
   let modifiedMap = new Map<string, NFTData>();
 
-  modifieds.forEach((data) => {
-    const path = data.domain + data.hexID;
-    modifiedMap.set(path, data);
+  modifieds.forEach((modified) => {
+    modifiedMap.set(modified.id, modified);
   });
 
   originals.forEach((original) => {
-    const path = original.domain + original.hexID;
+    const path = original.id;
     const modified = modifiedMap.get(path);
 
     // make sure that there is a corresponding modified NFT to this original
     if (modified === undefined) {
       throw Error(
-        `Original NFT [${original.domain}, ${original.hexID}] does not have a matching counterpart in modifieds`
+        `Original NFT [${original.domain}, ${original.id}] does not have a matching counterpart in modifieds`
       );
     }
 
@@ -75,4 +75,15 @@ export const compareNFTGroups = (
   }
 
   return batchDiff;
+};
+
+export const compareNFTFiles = (file1: string, file2: string): NFTBatchDiff => {
+  const file1NFTS: { nfts: NFTData[] } = JSON.parse(
+    fs.readFileSync(file1).toString()
+  );
+  const file2NFTS: { nfts: NFTData[] } = JSON.parse(
+    fs.readFileSync(file2).toString()
+  );
+
+  return compareNFTGroups(file1NFTS.nfts, file2NFTS.nfts);
 };

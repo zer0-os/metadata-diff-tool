@@ -8,7 +8,6 @@ import {
   MetadataChange,
   MetadataChangeRemoveMember,
   MetadataChangeAddMember,
-  isMetadata,
 } from "./types";
 
 export const compareMetadata = (
@@ -109,19 +108,22 @@ const compareMetadataAttributes = (
   return changes;
 };
 
-export const compareMetadataGeneric = <FirstType, SecondType>(
+export const compareMetadataGeneric = <
+  FirstType extends Metadata,
+  SecondType extends Metadata
+>(
   first: FirstType,
   second: SecondType
 ): MetadataChange[] => {
-  if (!isMetadata(first)) {
-    throw Error(
-      `First argument does not fulfill the Metadata interface [${first}]`
-    );
-  } else if (!isMetadata(second)) {
-    throw Error(
-      `Second argument does not fulfill the Metadata interface [${second}]`
-    );
-  }
+  // if (!isMetadata(first)) {
+  //   throw Error(
+  //     `First argument does not fulfill the Metadata interface [${first}]`
+  //   );
+  // } else if (!isMetadata(second)) {
+  //   throw Error(
+  //     `Second argument does not fulfill the Metadata interface [${second}]`
+  //   );
+  // }
 
   const memberChanges = compareMetadataMembersGeneric(first, second);
   const attribChanges = compareMetadataAttributes(
@@ -132,7 +134,10 @@ export const compareMetadataGeneric = <FirstType, SecondType>(
   return memberChanges.concat(attribChanges);
 };
 
-export const compareMetadataMembersGeneric = <OldMetadataType, NewMetadataType>(
+export const compareMetadataMembersGeneric = <
+  OldMetadataType extends Metadata,
+  NewMetadataType extends Metadata
+>(
   first: OldMetadataType,
   second: NewMetadataType
 ): MetadataChange[] => {
