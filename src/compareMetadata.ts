@@ -1,99 +1,55 @@
 import {
   Metadata,
   MetadataAttribute,
-  MetadataChangeModifyMember,
-  MetadataChangeRemoveAttribute,
-  MetadataChangeModifyAttribute,
-  MetadataChangeAddAttribute,
+  MetadataChangeModify,
   MetadataChange,
-  MetadataChangeRemoveMember,
-  MetadataChangeAddMember,
+  MetadataChangeRemove,
+  MetadataChangeAdd,
 } from "./types";
 
-export const compareMetadata = (
-  first: Metadata,
-  second: Metadata
-): MetadataChange[] => {
-  const valueChanges = compareMetadataValues(first, second);
-  const attributeChanges = compareMetadataAttributes(
-    first.attributes,
-    second.attributes
-  );
-
-  return valueChanges.concat(attributeChanges);
-};
-
-const compareMetadataValues = (
-  first: Metadata,
-  second: Metadata
-): MetadataChange[] => {
-  const changes: MetadataChange[] = [];
-
-  // get the name and values of each member in Metadata as strings
-  // attributes become arrays for their values
-  const firstVals: [string, any][] = Object.entries(first);
-  const secondVals: [string, any][] = Object.entries(second);
-
-  for (let i = 0; i < firstVals.length - 1; ++i) {
-    const firstKey = firstVals[i][0];
-    const secondKey = secondVals[i][0];
-    const firstVal = firstVals[i][1];
-    const secondVal = secondVals[i][1];
-
-    // make sure that the values are different
-    // and that we are not looking at attributes
-    if (firstVal != secondVal && firstKey != "attributes") {
-      changes.push(
-        new MetadataChangeModifyMember(
-          firstKey,
-          firstVals[i][1],
-          secondVals[i][1]
-        )
-      );
-    }
-  }
-
-  return changes;
-};
+interface Map {
+  [key: string]: any;
+}
 
 const compareMetadataAttributes = (
-  first: readonly MetadataAttribute[],
-  second: readonly MetadataAttribute[]
+  originalAttributes: readonly MetadataAttribute[],
+  modifiedAttributes: readonly MetadataAttribute[]
 ): MetadataChange[] => {
   const changes: MetadataChange[] = [];
 
   // construct a map of the second attribs
-  let newAttribsMap = new Map<string, string>();
-  second.forEach((attrib) => {
-    newAttribsMap.set(attrib.trait_type, attrib.value);
+  const newAttributesMap: Map = {};
+
+  modifiedAttributes.forEach((attribute) => {
+    newAttributesMap[attribute.trait_type] = attribute.value;
   });
 
   // walk through all currentState attributes,
   // check if they still exist or have changed
-  for (const firstAttrib of first) {
-    const trait_type = firstAttrib.trait_type;
-    const newAttribVal = newAttribsMap.get(trait_type);
+  for (const originalAttribute of originalAttributes) {
+    const trait_type = originalAttribute.trait_type;
+    const newAttributeValues = newAttributesMap[trait_type];
 
     // if this attribute exists in the modified state, check if it changes
-    if (newAttribVal !== undefined) {
-      if (newAttribVal != firstAttrib.value) {
+    if (newAttributeValues !== undefined) {
+      if (newAttributeValues != originalAttribute.value) {
         changes.push(
-          new MetadataChangeModifyAttribute(
-            trait_type,
-            firstAttrib.value,
-            newAttribVal
+          new MetadataChangeModify(
+            "attribute." + trait_type,
+            originalAttribute.value,
+            newAttributeValues
           )
         );
       }
 
-      newAttribsMap.delete(trait_type); // remove this attribute from the map
+      delete newAttributesMap[trait_type]; // remove this attribute from the map
     }
     // this attribute does not exist anymore in the modified state
     else {
       changes.push(
-        new MetadataChangeRemoveAttribute(
-          firstAttrib.trait_type,
-          firstAttrib.value
+        new MetadataChangeRemove(
+          "attribute." + originalAttribute.trait_type,
+          originalAttribute.value
         )
       );
     }
@@ -101,66 +57,79 @@ const compareMetadataAttributes = (
 
   // loop through all attributes that were not in the original state,
   // mark them as Attribute Additions
-  newAttribsMap.forEach((value, key) => {
-    changes.push(new MetadataChangeAddAttribute(key, value));
+
+  const newAttributesArray = Object.keys(newAttributesMap).map((key) => {
+    return {
+      key: key,
+      value: newAttributesMap[key],
+    };
+  });
+
+  newAttributesArray.forEach(({ key, value }) => {
+    changes.push(new MetadataChangeAdd("attribute." + key, value));
   });
 
   return changes;
 };
 
 export const compareMetadataGeneric = <
-  FirstType extends Metadata,
-  SecondType extends Metadata
+  OriginalType extends Metadata,
+  ModifiedType extends Metadata
 >(
-  first: FirstType,
-  second: SecondType
+  original: OriginalType,
+  modified: ModifiedType
 ): MetadataChange[] => {
-  // if (!isMetadata(first)) {
-  //   throw Error(
-  //     `First argument does not fulfill the Metadata interface [${first}]`
-  //   );
-  // } else if (!isMetadata(second)) {
-  //   throw Error(
-  //     `Second argument does not fulfill the Metadata interface [${second}]`
-  //   );
-  // }
-
-  const memberChanges = compareMetadataMembersGeneric(first, second);
+  const memberChanges = compareMetadataMembersGeneric(original, modified);
   const attribChanges = compareMetadataAttributes(
-    first.attributes,
-    second.attributes
+    original.attributes,
+    modified.attributes
   );
 
   return memberChanges.concat(attribChanges);
 };
 
 export const compareMetadataMembersGeneric = <
-  OldMetadataType extends Metadata,
-  NewMetadataType extends Metadata
+  OriginalType extends Metadata,
+  ModifiedType extends Metadata
 >(
-  first: OldMetadataType,
-  second: NewMetadataType
+  originals: OriginalType,
+  modifieds: ModifiedType
 ): MetadataChange[] => {
-  let changes: MetadataChange[] = [];
+  const changes: MetadataChange[] = [];
 
-  const firstKeys = Object.entries(first);
-  let secondMap = new Map<string, any>(Object.entries(second));
+  const originalKeys = Object.entries(originals);
+  const modifiedsMap: Map = {};
 
-  for (const [key, value] of firstKeys) {
-    if (key != "attributes") {
-      const secondVal = secondMap.get(key);
-      if (secondVal === undefined) {
-        changes.push(new MetadataChangeRemoveMember(key, value));
-      } else if (value != secondVal) {
-        changes.push(new MetadataChangeModifyMember(key, value, secondVal));
-      }
+  Object.entries(modifieds).forEach(([key, value]) => {
+    modifiedsMap[key] = value;
+  });
+
+  originalKeys.forEach(([key, value]) => {
+    if (key == "attributes") {
+      delete modifiedsMap[key];
+      return;
     }
 
-    secondMap.delete(key);
-  }
+    const modifiedValue = modifiedsMap[key];
 
-  secondMap.forEach((value, key) => {
-    changes.push(new MetadataChangeAddMember(key, value));
+    if (modifiedValue === undefined) {
+      changes.push(new MetadataChangeRemove(key, value));
+    } else if (value != modifiedValue) {
+      changes.push(new MetadataChangeModify(key, value, modifiedValue));
+    }
+
+    delete modifiedsMap[key];
+  });
+
+  const modifiedsArray = Object.keys(modifiedsMap).map((key) => {
+    return {
+      key: key,
+      value: modifiedsMap[key],
+    };
+  });
+
+  modifiedsArray.forEach((obj) => {
+    changes.push(new MetadataChangeAdd(obj.key, obj.value));
   });
 
   return changes;

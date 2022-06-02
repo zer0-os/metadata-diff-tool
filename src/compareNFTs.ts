@@ -1,8 +1,12 @@
 import * as fs from "fs";
-import { compareMetadata, compareMetadataGeneric } from "./compareMetadata";
-import { NFTData, NFTDiff, NFTBatchDiff } from "./types";
+import { compareMetadataGeneric } from "./compareMetadata";
+import { NftData, NftDiff, NftBatchDiff } from "./types";
 
-export const compareNFTs = (original: NFTData, modified: NFTData): NFTDiff => {
+interface NftDataMap {
+  [key: string]: NftData;
+}
+
+const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   if (original.domain != modified.domain) {
     throw Error(
       `Original NFT domain [${original.domain}] and modified NFT domain [${modified.domain}] do not match`
@@ -13,7 +17,7 @@ export const compareNFTs = (original: NFTData, modified: NFTData): NFTDiff => {
     );
   }
 
-  const diff: NFTDiff = {
+  const diff: NftDiff = {
     domian: original.domain,
     id: original.id,
     changes: [],
@@ -24,21 +28,27 @@ export const compareNFTs = (original: NFTData, modified: NFTData): NFTDiff => {
   return diff;
 };
 
-export const compareNFTGroups = (
-  originals: NFTData[],
-  modifieds: NFTData[]
-): NFTBatchDiff => {
-  const batchDiff: NFTBatchDiff = { summary: {}, diffs: [] };
+export const compareNftGroups = (
+  originalDataArray: NftData[],
+  modifiedDataArray: NftData[]
+): NftBatchDiff => {
+  const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
-  let modifiedMap = new Map<string, NFTData>();
+  const modifiedsMap: NftDataMap = {};
 
-  modifieds.forEach((modified) => {
-    modifiedMap.set(modified.id, modified);
+  // add each modified NFT to a map, throw if there are duplicates
+  modifiedDataArray.forEach((modified) => {
+    if (modifiedsMap[modified.id] !== undefined) {
+      throw Error(
+        `Duplicated NFT [${modified.id}] found in the modifiedDataArray`
+      );
+    }
+    modifiedsMap[modified.id] = modified;
   });
 
-  originals.forEach((original) => {
+  originalDataArray.forEach((original) => {
     const path = original.id;
-    const modified = modifiedMap.get(path);
+    const modified = modifiedsMap[path];
 
     // make sure that there is a corresponding modified NFT to this original
     if (modified === undefined) {
@@ -48,18 +58,12 @@ export const compareNFTGroups = (
     }
 
     // get the diff of these specific NFTs
-    const diff = compareNFTs(original, modified);
+    const diff = compareNfts(original, modified);
 
     // for each change, increment the number of changes that trait has
     diff.changes.forEach((change) => {
-      let numSummaryChanges = batchDiff.summary[change.key];
-      if (numSummaryChanges === undefined) {
-        numSummaryChanges = 1;
-      } else {
-        ++numSummaryChanges;
-      }
-
-      batchDiff.summary[change.key] = numSummaryChanges;
+      const summaryAtKey = batchDiff.summary[change.key];
+      batchDiff.summary[change.key] = summaryAtKey ? summaryAtKey + 1 : 1;
     });
 
     // add this diff to the total number of diffs
@@ -67,23 +71,26 @@ export const compareNFTGroups = (
 
     // remove this NFT from the modified map
     // so that we can check for extras at the end
-    modifiedMap.delete(path);
+    delete modifiedsMap[path];
   });
 
-  if (modifiedMap.size) {
-    throw Error(`Extra modified NFTs given [${modifiedMap}]`);
+  if (modifiedsMap.size) {
+    throw Error(`Extra modified NFTs given [${modifiedsMap}]`);
   }
 
   return batchDiff;
 };
 
-export const compareNFTFiles = (file1: string, file2: string): NFTBatchDiff => {
-  const file1NFTS: { nfts: NFTData[] } = JSON.parse(
-    fs.readFileSync(file1).toString()
+export const compareNftFiles = (
+  originalFile: string,
+  modifiedFile: string
+): NftBatchDiff => {
+  const file1Nfts: { nfts: NftData[] } = JSON.parse(
+    fs.readFileSync(originalFile).toString()
   );
-  const file2NFTS: { nfts: NFTData[] } = JSON.parse(
-    fs.readFileSync(file2).toString()
+  const file2Nfts: { nfts: NftData[] } = JSON.parse(
+    fs.readFileSync(modifiedFile).toString()
   );
 
-  return compareNFTGroups(file1NFTS.nfts, file2NFTS.nfts);
+  return compareNftGroups(file1Nfts.nfts, file2Nfts.nfts);
 };

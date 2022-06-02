@@ -1,6 +1,6 @@
 import { Metadata } from "./metadata";
 
-export interface NFTData {
+export interface NftData {
   domain?: string;
   id: string;
   metadata: Metadata;

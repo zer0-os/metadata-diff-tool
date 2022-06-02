@@ -1,21 +1,21 @@
 {
   "dependencies": {
-    "ts-node": "^10.8.0",
-    "tsc": "^2.0.4",
-    "typescript": "^4.6.4",
-    "yargs": "^17.5.1"
+    "ts-node": "10.8.0",
+    "tsc": "2.0.4",
+    "typescript": "4.6.4",
+    "yargs": "17.5.1"
   },
   "name": "metadata-diff-tool",
   "version": "1.0.0",
   "description": "A diff tool that shows the difference between two provided NFT metadata's",
   "main": "index.js",
   "devDependencies": {
-    "@types/node": "^17.0.33",
-    "@types/yargs": "^17.0.10"
+    "@types/node": "17.0.33",
+    "@types/yargs": "17.0.10"
   },
   "scripts": {
     "cli": "ts-node ./src/main.ts"
   },
-  "author": "Kenny Mecham",
+  "author": "Zer0 Tech",
   "license": "MIT"
 }

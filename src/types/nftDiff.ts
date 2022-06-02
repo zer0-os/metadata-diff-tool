@@ -1,6 +1,6 @@
 import { MetadataChange } from ".";
 
-export interface NFTDiff {
+export interface NftDiff {
   domian?: string;
   id: string;
   changes: MetadataChange[];

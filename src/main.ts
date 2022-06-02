@@ -1,4 +1,4 @@
-import { compareNFTFiles } from "./compareNFTs";
+import { compareNftFiles } from "./compareNFTs";
 import yargs, { nargs } from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
@@ -8,7 +8,7 @@ const writeDiffToFile = (
   file2: string,
   outFile: string | undefined
 ) => {
-  const diff = compareNFTFiles(file1, file2);
+  const diff = compareNftFiles(file1, file2);
 
   if (outFile === undefined) {
     console.log(diff);

@@ -1,8 +1,8 @@
-import { NFTDiff } from "./";
+import { NftDiff } from "./";
 
-export interface NFTBatchDiff {
+export interface NftBatchDiff {
   summary: {
     [key: string]: number;
   };
-  diffs: NFTDiff[];
+  diffs: NftDiff[];
 }

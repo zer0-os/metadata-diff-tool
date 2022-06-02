@@ -1,75 +1,39 @@
 export interface MetadataChange {
-  readonly description: string;
+  readonly type: string;
   readonly key: string;
 }
 
-export class MetadataChangeAddAttribute implements MetadataChange {
-  constructor(key: string, newValue: string) {
+export class MetadataChangeAdd<T> implements MetadataChange {
+  constructor(key: string, value: T) {
     this.key = key;
-    this.new = newValue;
+    this.new = value;
   }
 
-  readonly description = "Added an Attribute";
+  readonly type = "Add";
   readonly key: string;
-  readonly new: string;
+  readonly new: T;
 }
 
-export class MetadataChangeRemoveAttribute implements MetadataChange {
-  constructor(key: string, oldValue: string) {
+export class MetadataChangeRemove<T> implements MetadataChange {
+  constructor(key: string, value: T) {
     this.key = key;
-    this.old = oldValue;
+    this.old = value;
   }
-  readonly description = "Removed an Attribute";
+
+  readonly type = "Remove";
   readonly key: string;
-  readonly old: string;
+  readonly old: T;
 }
 
-export class MetadataChangeModifyAttribute implements MetadataChange {
-  constructor(key: string, oldValue: string, newValue: string) {
+export class MetadataChangeModify<OldType, NewType> implements MetadataChange {
+  constructor(key: string, old: OldType, value: NewType) {
     this.key = key;
-    this.old = oldValue;
-    this.new = newValue;
+    this.old = old;
+    this.new = value;
   }
 
-  readonly description = "Modified an Attribute";
+  readonly type = "Modify";
   readonly key: string;
-  readonly old: string;
-  readonly new: string;
-}
-
-export class MetadataChangeAddMember<T> implements MetadataChange {
-  constructor(key: string, newValue: T) {
-    this.key = key;
-    this.new = newValue;
-  }
-
-  description = `Added a Member`;
-  key: string;
-  new: T;
-}
-
-export class MetadataChangeRemoveMember<T> implements MetadataChange {
-  constructor(key: string, oldValue: T) {
-    this.key = key;
-    this.old = oldValue;
-  }
-
-  description = `Removed a Member`;
-  key: string;
-  old: T;
-}
-
-export class MetadataChangeModifyMember<OldType, NewType>
-  implements MetadataChange
-{
-  constructor(key: string, oldValue: OldType, newValue: NewType) {
-    this.key = key;
-    this.old = oldValue;
-    this.new = newValue;
-  }
-
-  description = `Modified a Member`;
-  key: string;
-  old: OldType;
-  new: NewType;
+  readonly old: OldType;
+  readonly new: NewType;
 }
