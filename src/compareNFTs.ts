@@ -1,10 +1,6 @@
 import * as fs from "fs";
 import { compareMetadataGeneric } from "./compareMetadata";
-import { NftData, NftDiff, NftBatchDiff } from "./types";
-
-interface NftDataMap {
-  [key: string]: NftData;
-}
+import { NftData, NftDiff, NftBatchDiff, Map } from "./types";
 
 const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   if (original.domain != modified.domain) {
@@ -34,26 +30,26 @@ export const compareNftGroups = (
 ): NftBatchDiff => {
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
-  const modifiedsMap: NftDataMap = {};
+  const originalsMap: Map<NftData> = {};
 
   // add each modified NFT to a map, throw if there are duplicates
-  modifiedDataArray.forEach((modified) => {
-    if (modifiedsMap[modified.id] !== undefined) {
+  originalDataArray.forEach((original) => {
+    if (originalsMap[original.id] !== undefined) {
       throw Error(
-        `Duplicated NFT [${modified.id}] found in the modifiedDataArray`
+        `Duplicated NFT [${original.id}] found in the modifiedDataArray`
       );
     }
-    modifiedsMap[modified.id] = modified;
+    originalsMap[original.id] = original;
   });
 
-  originalDataArray.forEach((original) => {
-    const path = original.id;
-    const modified = modifiedsMap[path];
+  modifiedDataArray.forEach((modified) => {
+    const path = modified.id;
+    const original = originalsMap[path];
 
     // make sure that there is a corresponding modified NFT to this original
-    if (modified === undefined) {
+    if (original === undefined) {
       throw Error(
-        `Original NFT [${original.domain}, ${original.id}] does not have a matching counterpart in modifieds`
+        `Modified NFT [${modified.domain}, ${modified.id}] does not have a matching counterpart in original NFTs`
       );
     }
 
@@ -71,12 +67,8 @@ export const compareNftGroups = (
 
     // remove this NFT from the modified map
     // so that we can check for extras at the end
-    delete modifiedsMap[path];
+    delete originalsMap[path];
   });
-
-  if (modifiedsMap.size) {
-    throw Error(`Extra modified NFTs given [${modifiedsMap}]`);
-  }
 
   return batchDiff;
 };

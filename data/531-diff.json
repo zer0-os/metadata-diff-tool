@@ -1,7 +1,7 @@
 {
   "summary": {
-    "attribute.Color": 32,
-    "attribute.Pattern": 1
+    "Attribute.Color": 32,
+    "Attribute.Pattern": 1
   },
   "diffs": [
     {
@@ -10,7 +10,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Dreams",
           "new": "Ice Cream"
         }
@@ -22,13 +22,13 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Pattern",
+          "key": "Attribute.Pattern",
           "old": "thunder",
           "new": "Thunder"
         },
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Intergalactic",
           "new": "Green Machine"
         }
@@ -40,7 +40,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -52,7 +52,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Cyber Wave",
           "new": "Grey Matter"
         }
@@ -64,7 +64,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Cyber Wave",
           "new": "Grey Matter"
         }
@@ -76,7 +76,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -88,7 +88,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -100,7 +100,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -112,7 +112,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Intergalactic",
           "new": "Green Machine"
         }
@@ -124,7 +124,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Deep Wilderness",
           "new": "Lost Royalty"
         }
@@ -136,7 +136,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Seabound",
           "new": "Deep Blue"
         }
@@ -148,7 +148,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -160,7 +160,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Teal Tones",
           "new": "Pink Wave"
         }
@@ -172,7 +172,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Northern Lights",
           "new": "Forest"
         }
@@ -184,7 +184,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Rose Wave",
           "new": "Royal Future"
         }
@@ -196,7 +196,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -208,7 +208,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Deep Wilderness",
           "new": "Lost Royalty"
         }
@@ -220,7 +220,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Hypnotic",
           "new": "Blast Off"
         }
@@ -232,7 +232,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -244,7 +244,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -256,7 +256,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Deep Wilderness",
           "new": "Lost Royalty"
         }
@@ -268,7 +268,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Intergalactic",
           "new": "Green Machine"
         }
@@ -280,7 +280,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -292,7 +292,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -304,7 +304,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Memory",
           "new": "Aquatic"
         }
@@ -316,7 +316,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Deep Wilderness",
           "new": "Lost Royalty"
         }
@@ -328,7 +328,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -340,7 +340,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Smooth Jazz",
           "new": "Night Rider"
         }
@@ -352,7 +352,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Combination",
           "new": "Weird"
         }
@@ -364,7 +364,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Northern Lights",
           "new": "Forest"
         }
@@ -376,7 +376,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }
@@ -388,7 +388,7 @@
       "changes": [
         {
           "type": "Modify",
-          "key": "attribute.Color",
+          "key": "Attribute.Color",
           "old": "Transition",
           "new": "Beam Up"
         }

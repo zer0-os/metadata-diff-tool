@@ -5,20 +5,18 @@ import {
   MetadataChange,
   MetadataChangeRemove,
   MetadataChangeAdd,
+  Map,
 } from "./types";
-
-interface Map {
-  [key: string]: any;
-}
 
 const compareMetadataAttributes = (
   originalAttributes: readonly MetadataAttribute[],
   modifiedAttributes: readonly MetadataAttribute[]
 ): MetadataChange[] => {
+  const attributeKeyPrefix = "Attribute.";
   const changes: MetadataChange[] = [];
 
   // construct a map of the second attribs
-  const newAttributesMap: Map = {};
+  const newAttributesMap: Map<string> = {};
 
   modifiedAttributes.forEach((attribute) => {
     newAttributesMap[attribute.trait_type] = attribute.value;
@@ -27,28 +25,28 @@ const compareMetadataAttributes = (
   // walk through all currentState attributes,
   // check if they still exist or have changed
   for (const originalAttribute of originalAttributes) {
-    const trait_type = originalAttribute.trait_type;
-    const newAttributeValues = newAttributesMap[trait_type];
+    const traitType = originalAttribute.trait_type;
+    const newAttributeValues = newAttributesMap[traitType];
 
     // if this attribute exists in the modified state, check if it changes
     if (newAttributeValues !== undefined) {
       if (newAttributeValues != originalAttribute.value) {
         changes.push(
           new MetadataChangeModify(
-            "Attribute." + trait_type,
+            attributeKeyPrefix + traitType,
             originalAttribute.value,
             newAttributeValues
           )
         );
       }
 
-      delete newAttributesMap[trait_type]; // remove this attribute from the map
+      delete newAttributesMap[traitType]; // remove this attribute from the map
     }
     // this attribute does not exist anymore in the modified state
     else {
       changes.push(
         new MetadataChangeRemove(
-          "Attribute." + originalAttribute.trait_type,
+          attributeKeyPrefix + traitType,
           originalAttribute.value
         )
       );
@@ -60,7 +58,7 @@ const compareMetadataAttributes = (
 
   const newAttributesArray = Object.keys(newAttributesMap).map((key) => {
     return {
-      key: "Attribute." + key,
+      key: attributeKeyPrefix + key,
       value: newAttributesMap[key],
     };
   });
@@ -98,7 +96,7 @@ export const compareMetadataMembersGeneric = <
   const changes: MetadataChange[] = [];
 
   const originalKeys = Object.entries(originals);
-  const modifiedsMap: Map = {};
+  const modifiedsMap: Map<any> = {};
 
   Object.entries(modifieds).forEach(([key, value]) => {
     modifiedsMap[key] = value;
