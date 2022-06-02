@@ -35,7 +35,7 @@ const compareMetadataAttributes = (
       if (newAttributeValues != originalAttribute.value) {
         changes.push(
           new MetadataChangeModify(
-            "attribute." + trait_type,
+            "Attribute." + trait_type,
             originalAttribute.value,
             newAttributeValues
           )
@@ -48,7 +48,7 @@ const compareMetadataAttributes = (
     else {
       changes.push(
         new MetadataChangeRemove(
-          "attribute." + originalAttribute.trait_type,
+          "Attribute." + originalAttribute.trait_type,
           originalAttribute.value
         )
       );
@@ -60,13 +60,13 @@ const compareMetadataAttributes = (
 
   const newAttributesArray = Object.keys(newAttributesMap).map((key) => {
     return {
-      key: key,
+      key: "Attribute." + key,
       value: newAttributesMap[key],
     };
   });
 
   newAttributesArray.forEach(({ key, value }) => {
-    changes.push(new MetadataChangeAdd("attribute." + key, value));
+    changes.push(new MetadataChangeAdd(key, value));
   });
 
   return changes;
@@ -80,12 +80,12 @@ export const compareMetadataGeneric = <
   modified: ModifiedType
 ): MetadataChange[] => {
   const memberChanges = compareMetadataMembersGeneric(original, modified);
-  const attribChanges = compareMetadataAttributes(
+  const attributeChanges = compareMetadataAttributes(
     original.attributes,
     modified.attributes
   );
 
-  return memberChanges.concat(attribChanges);
+  return memberChanges.concat(attributeChanges);
 };
 
 export const compareMetadataMembersGeneric = <

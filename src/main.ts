@@ -1,4 +1,4 @@
-import { compareNftFiles } from "./compareNFTs";
+import { compareNftFiles } from "./compareNfts";
 import yargs, { nargs } from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
