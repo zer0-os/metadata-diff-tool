@@ -1,6 +1,8 @@
 import * as fs from "fs";
 import { compareMetadataGeneric } from "./compareMetadata";
-import { NftData, NftDiff, NftBatchDiff, Map } from "./types";
+import { NftData, NftDiff, NftBatchDiff, Map, NftFileData } from "./types";
+import Ajv from "ajv";
+import { nftArraySchema } from "./ajvSchemas";
 
 const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   if (original.domain != modified.domain) {
@@ -28,6 +30,13 @@ export const compareNftGroups = (
   originalDataArray: NftData[],
   modifiedDataArray: NftData[]
 ): NftBatchDiff => {
+  // compile the nft Schema
+  const nftFileSchemaValidation = new Ajv().compile(nftArraySchema);
+
+  // validate both arrays
+  nftFileSchemaValidation(originalDataArray);
+  nftFileSchemaValidation(modifiedDataArray);
+
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
   const originalsMap: Map<NftData> = {};
@@ -77,10 +86,10 @@ export const compareNftFiles = (
   originalFile: string,
   modifiedFile: string
 ): NftBatchDiff => {
-  const file1Nfts: { nfts: NftData[] } = JSON.parse(
+  const file1Nfts: NftFileData = JSON.parse(
     fs.readFileSync(originalFile).toString()
   );
-  const file2Nfts: { nfts: NftData[] } = JSON.parse(
+  const file2Nfts: NftFileData = JSON.parse(
     fs.readFileSync(modifiedFile).toString()
   );
 
