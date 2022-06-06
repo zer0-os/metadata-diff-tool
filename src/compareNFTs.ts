@@ -16,7 +16,7 @@ const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   }
 
   const diff: NftDiff = {
-    domian: original.domain,
+    domain: original.domain,
     id: original.id,
     changes: [],
   };

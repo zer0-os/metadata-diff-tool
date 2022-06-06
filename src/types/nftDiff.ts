@@ -1,7 +1,7 @@
 import { MetadataChange } from ".";
 
 export interface NftDiff {
-  domian?: string;
+  domain?: string;
   id: string;
   changes: MetadataChange[];
 }
