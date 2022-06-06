@@ -26,7 +26,7 @@ const metadataSchema: JSONSchemaType<Metadata> = {
     },
   },
   required: ["name", "description"],
-  oneOf: [
+  anyOf: [
     { required: ["image"] },
     { required: ["animation_url"] },
     { required: ["image_full"] },

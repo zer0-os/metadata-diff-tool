@@ -4,6 +4,8 @@ import { NftData, NftDiff, NftBatchDiff, Map, NftFileData } from "./types";
 import Ajv from "ajv";
 import { nftArraySchema } from "./ajvSchemas";
 
+const ajv = new Ajv();
+
 const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   if (original.domain != modified.domain) {
     throw Error(
@@ -31,11 +33,22 @@ export const compareNftGroups = (
   modifiedDataArray: NftData[]
 ): NftBatchDiff => {
   // compile the nft Schema
-  const nftFileSchemaValidation = new Ajv().compile(nftArraySchema);
+  const nftFileSchemaValidation = ajv.compile(nftArraySchema);
 
   // validate both arrays
-  nftFileSchemaValidation(originalDataArray);
-  nftFileSchemaValidation(modifiedDataArray);
+  const originalValidation = nftFileSchemaValidation(originalDataArray);
+  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
+
+  if (!originalValidation) {
+    console.log("Invalid OriginalDataArray given");
+  }
+  if (!modifiedValidation) {
+    console.log("Invalid ModifiedDataArray given");
+  }
+
+  if (!originalValidation || !modifiedValidation) {
+    throw Error("Invalid data given to compareNftGroups");
+  }
 
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
@@ -73,8 +86,10 @@ export const compareNftGroups = (
       batchDiff.summary[change.key] = summaryAtKey ? summaryAtKey + 1 : 1;
     });
 
-    // add this diff to the total number of diffs
-    batchDiff.diffs.push(diff);
+    // add this diff to the total number of diffs if it has any changes
+    if (diff.changes.length) {
+      batchDiff.diffs.push(diff);
+    }
 
     // remove this NFT from the modified map
     // so that we can check for extras at the end
