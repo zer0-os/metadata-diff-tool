@@ -41,11 +41,11 @@ export const compareNftGroups = (
 
   const originalsMap: Map<NftData> = {};
 
-  // add each modified NFT to a map, throw if there are duplicates
+  // add each original NFT to a map, throw if there are duplicates
   originalDataArray.forEach((original) => {
     if (originalsMap[original.id] !== undefined) {
       throw Error(
-        `Duplicated NFT [${original.id}] found in the modifiedDataArray`
+        `Duplicated NFT [${original.id}] found in the originalDataArray`
       );
     }
     originalsMap[original.id] = original;
@@ -55,7 +55,9 @@ export const compareNftGroups = (
     const path = modified.id;
     const original = originalsMap[path];
 
-    // make sure that there is a corresponding modified NFT to this original
+    // make sure that there is a corresponding modified NFT to this original,
+    // this could catch duplicates in the modified map as well since they would have
+    // been removed on their first diff check
     if (original === undefined) {
       throw Error(
         `Modified NFT [${modified.domain}, ${modified.id}] does not have a matching counterpart in original NFTs`
