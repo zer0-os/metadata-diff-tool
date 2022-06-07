@@ -2,7 +2,7 @@ import os
 import sys
 
 
-for x in range(1, 8):
+for x in range(1, 9):
     filepath = f"./tests/Test{x}/"
     verbose = ""
 
