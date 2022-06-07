@@ -2,14 +2,16 @@ import { compareNftFiles } from "./compareNfts";
 import yargs, { nargs } from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
+import { Logger } from "./types";
 
 const writeDiffToFile = (
   file1: string,
   file2: string,
-  outFile: string | undefined
+  outFile: string | undefined,
+  logger: Logger
 ) => {
   try {
-    const diff = compareNftFiles(file1, file2);
+    const diff = compareNftFiles(file1, file2, logger);
 
     if (outFile === undefined) {
       console.log(diff);
@@ -48,9 +50,12 @@ yargs(hideBin(process.argv))
         });
     },
     (argv) => {
-      if (argv.verbose) console.info(`start server on :${argv.user}`);
-
-      writeDiffToFile(argv.file1, argv.file2, argv.outputFile);
+      writeDiffToFile(
+        argv.file1,
+        argv.file2,
+        argv.outputFile,
+        argv.verbose ? console.debug : (message, ...optional): void => {}
+      );
       // write to file here
     }
   )

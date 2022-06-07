@@ -1,19 +1,34 @@
 import * as fs from "fs";
 import { compareMetadataGeneric } from "./compareMetadata";
-import { NftData, NftDiff, NftBatchDiff, Map, NftFileData } from "./types";
+import {
+  NftData,
+  NftDiff,
+  NftBatchDiff,
+  Map,
+  NftFileData,
+  Logger,
+} from "./types";
 import Ajv from "ajv";
 import { nftArraySchema } from "./ajvSchemas";
 
 const ajv = new Ajv();
 
-const compareNfts = (original: NftData, modified: NftData): NftDiff => {
+const compareNfts = (
+  original: NftData,
+  modified: NftData,
+  logger: Logger
+): NftDiff => {
+  logger(
+    `Validating that [${original.id}] and [${modified.id}] are the same NFT`
+  );
+
   if (original.domain != modified.domain) {
     throw Error(
       `Original NFT domain [${original.domain}] and modified NFT domain [${modified.domain}] do not match`
     );
   } else if (original.id != modified.id) {
     throw Error(
-      `Original NFT hexID [${original.id}] and modified NFT hexID [${modified.id}] do not match`
+      `Original NFT id [${original.id}] and modified NFT id [${modified.id}] do not match`
     );
   }
 
@@ -23,37 +38,45 @@ const compareNfts = (original: NftData, modified: NftData): NftDiff => {
     changes: [],
   };
 
-  diff.changes = compareMetadataGeneric(original.metadata, modified.metadata);
+  diff.changes = compareMetadataGeneric(
+    original.metadata,
+    modified.metadata,
+    logger
+  );
+
+  logger(`NFT [${original.id}] has [${diff.changes.length}] total changes`);
 
   return diff;
 };
 
 export const compareNftGroups = (
   originalDataArray: NftData[],
-  modifiedDataArray: NftData[]
+  modifiedDataArray: NftData[],
+  logger: Logger
 ): NftBatchDiff => {
   // compile the nft Schema
   const nftFileSchemaValidation = ajv.compile(nftArraySchema);
 
   // validate both arrays
+  logger("Validating Original NFT Data Array");
   const originalValidation = nftFileSchemaValidation(originalDataArray);
-  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
-
   if (!originalValidation) {
-    console.log("Invalid OriginalDataArray given");
-  }
-  if (!modifiedValidation) {
-    console.log("Invalid ModifiedDataArray given");
+    logger("Invalid Original NFT Data given");
+    throw Error("Invalid originalDataArray given to compareNftGroups");
   }
 
-  if (!originalValidation || !modifiedValidation) {
-    throw Error("Invalid data given to compareNftGroups");
+  logger("Validating Modified NFT Data Array");
+  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
+  if (!modifiedValidation) {
+    logger("Invalid Modified NFT Data Array given");
+    throw Error("Invalid modifiedDataArray given to compareNftGroups");
   }
 
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
   const originalsMap: Map<NftData> = {};
 
+  logger("Creating Map of original data");
   // add each original NFT to a map, throw if there are duplicates
   originalDataArray.forEach((original) => {
     if (originalsMap[original.id] !== undefined) {
@@ -64,6 +87,7 @@ export const compareNftGroups = (
     originalsMap[original.id] = original;
   });
 
+  logger("Validating the Modified array is a subset of the Original array");
   modifiedDataArray.forEach((modified) => {
     const path = modified.id;
     const original = originalsMap[path];
@@ -78,7 +102,7 @@ export const compareNftGroups = (
     }
 
     // get the diff of these specific NFTs
-    const diff = compareNfts(original, modified);
+    const diff = compareNfts(original, modified, logger);
 
     // for each change, increment the number of changes that trait has
     diff.changes.forEach((change) => {
@@ -101,7 +125,8 @@ export const compareNftGroups = (
 
 export const compareNftFiles = (
   originalFile: string,
-  modifiedFile: string
+  modifiedFile: string,
+  logger: Logger
 ): NftBatchDiff => {
   const file1Nfts: NftFileData = JSON.parse(
     fs.readFileSync(originalFile).toString()
@@ -110,5 +135,7 @@ export const compareNftFiles = (
     fs.readFileSync(modifiedFile).toString()
   );
 
-  return compareNftGroups(file1Nfts.nfts, file2Nfts.nfts);
+  logger(`Comparing NFT Files [${originalFile}] and [${modifiedFile}]`);
+
+  return compareNftGroups(file1Nfts.nfts, file2Nfts.nfts, logger);
 };
