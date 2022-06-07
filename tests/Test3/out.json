@@ -1,3 +1,3 @@
 {
-  "Error": "Invalid data given to compareNftGroups"
+  "Error": "Invalid data given to compareNftGroups: [Invalid OriginalDataArray: [must have required property 'description']]"
 }

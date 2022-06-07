@@ -1,8 +1,9 @@
 import * as fs from "fs";
 import { compareMetadataGeneric } from "./compareMetadata";
 import { NftData, NftDiff, NftBatchDiff, Map, NftFileData } from "./types";
-import Ajv from "ajv";
+import Ajv, { DefinedError } from "ajv";
 import { nftArraySchema } from "./ajvSchemas";
+import { Defined } from "yargs";
 
 const ajv = new Ajv();
 
@@ -34,20 +35,43 @@ export const compareNftGroups = (
 ): NftBatchDiff => {
   // compile the nft Schema
   const nftFileSchemaValidation = ajv.compile(nftArraySchema);
+  const errorStrings: string[] = [];
 
   // validate both arrays
   const originalValidation = nftFileSchemaValidation(originalDataArray);
-  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
-
   if (!originalValidation) {
-    console.log("Invalid OriginalDataArray given");
+    const errors: string[] = [];
+    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+      if (error.message) {
+        errors.push(error.message);
+      }
+    }
+
+    nftFileSchemaValidation.errors = [];
+    const errorMessage = `Invalid OriginalDataArray: [${errors}]`;
+    errorStrings.push(errorMessage);
+    console.log(errorMessage);
   }
+
+  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
   if (!modifiedValidation) {
-    console.log("Invalid ModifiedDataArray given");
+    const errors: string[] = [];
+    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+      if (error.message) {
+        errors.push(error.message);
+      }
+    }
+
+    nftFileSchemaValidation.errors = [];
+    const errorMessage = `Invalid ModifiedDataArray: [${errors}]`;
+    errorStrings.push(errorMessage);
+    console.log(errorMessage);
   }
 
   if (!originalValidation || !modifiedValidation) {
-    throw Error("Invalid data given to compareNftGroups");
+    let errorString = "";
+
+    throw Error(`Invalid data given to compareNftGroups: [${errorStrings}]`);
   }
 
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
