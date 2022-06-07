@@ -1,2 +1,2 @@
 node_modules/
-data/Tests/**/myout.json
+**/myout.json
