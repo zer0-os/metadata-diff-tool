@@ -1,3 +1,8 @@
-{
-  "Error": "Invalid data given to compareNftGroups: [Invalid OriginalDataArray: [must have required property 'name']]"
-}
+[
+  {
+    "description": "Invalid OriginalDataArray",
+    "errors": [
+      "must have required property 'name'"
+    ]
+  }
+]

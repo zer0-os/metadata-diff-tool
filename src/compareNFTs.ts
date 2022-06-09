@@ -56,42 +56,58 @@ export const compareNftGroups = (
 ): NftBatchDiff => {
   // compile the nft Schema
   const nftFileSchemaValidation = ajv.compile(nftArraySchema);
-  const errorStrings: string[] = [];
+
+  const errors: {
+    description: string;
+    errors: string[];
+  }[] = [];
 
   // validate both arrays
   logger("Validating Original NFT Data Array");
   const originalValidation = nftFileSchemaValidation(originalDataArray);
   if (!originalValidation) {
-    const errors: string[] = [];
+    const originalArrayErrors: {
+      description: string;
+      errors: string[];
+    } = {
+      description: "Invalid OriginalDataArray",
+      errors: [],
+    };
+
     for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
       if (error.message) {
-        errors.push(error.message);
+        originalArrayErrors.errors.push(error.message);
       }
     }
 
     nftFileSchemaValidation.errors = [];
-    const errorMessage = `Invalid OriginalDataArray: [${errors}]`;
-    errorStrings.push(errorMessage);
-    logger(errorMessage);
+    errors.push(originalArrayErrors);
+    logger(errors);
   }
 
   const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
   if (!modifiedValidation) {
-    const errors: string[] = [];
+    const modifiedArrayErrors: {
+      description: string;
+      errors: string[];
+    } = {
+      description: "Invalid ModifiedDataArray",
+      errors: [],
+    };
+
     for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
       if (error.message) {
-        errors.push(error.message);
+        modifiedArrayErrors.errors.push(error.message);
       }
     }
 
     nftFileSchemaValidation.errors = [];
-    const errorMessage = `Invalid ModifiedDataArray: [${errors}]`;
-    errorStrings.push(errorMessage);
-    logger(errorMessage);
+    errors.push(modifiedArrayErrors);
+    logger(errors);
   }
 
   if (!originalValidation || !modifiedValidation) {
-    throw Error(`Invalid data given to compareNftGroups: [${errorStrings}]`);
+    throw errors;
   }
 
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
