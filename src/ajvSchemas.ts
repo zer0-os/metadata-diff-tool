@@ -34,7 +34,7 @@ const metadataSchema: JSONSchemaType<Metadata> = {
   additionalProperties: true,
 };
 
-const nftSchema: JSONSchemaType<NftData> = {
+export const nftSchema: JSONSchemaType<NftData> = {
   type: "object",
   properties: {
     domain: { type: "string", nullable: true },

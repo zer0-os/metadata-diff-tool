@@ -3,6 +3,7 @@ import yargs, { nargs } from "yargs";
 import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
 import { Logger } from "./types";
+import "dotenv/config";
 
 const writeDiffToFile = (
   file1: string,
