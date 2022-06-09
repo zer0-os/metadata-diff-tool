@@ -1,3 +1,11 @@
-{
-  "Error": "Invalid data given to compareNftGroups: [Invalid ModifiedDataArray: [must have required property 'image',must have required property 'animation_url',must have required property 'image_full',must match a schema in anyOf]]"
-}
+[
+  {
+    "description": "Invalid ModifiedDataArray",
+    "errors": [
+      "must have required property 'image'",
+      "must have required property 'animation_url'",
+      "must have required property 'image_full'",
+      "must match a schema in anyOf"
+    ]
+  }
+]
