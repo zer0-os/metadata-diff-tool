@@ -1,6 +1,11 @@
 import * as fs from "fs";
 import { compareMetadataGeneric } from "./compareMetadata";
-import { NftData, NftDiff, NftBatchDiff, Map } from "./types";
+import { NftData, NftDiff, NftBatchDiff, Map, NftFileData } from "./types";
+import Ajv, { DefinedError } from "ajv";
+import { nftArraySchema } from "./ajvSchemas";
+import { Defined } from "yargs";
+
+const ajv = new Ajv();
 
 const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   if (original.domain != modified.domain) {
@@ -14,7 +19,7 @@ const compareNfts = (original: NftData, modified: NftData): NftDiff => {
   }
 
   const diff: NftDiff = {
-    domian: original.domain,
+    domain: original.domain,
     id: original.id,
     changes: [],
   };
@@ -28,6 +33,61 @@ export const compareNftGroups = (
   originalDataArray: NftData[],
   modifiedDataArray: NftData[]
 ): NftBatchDiff => {
+  // compile the nft Schema
+  const nftFileSchemaValidation = ajv.compile(nftArraySchema);
+
+  const errors: {
+    description: string;
+    errors: string[];
+  }[] = [];
+
+  // validate both arrays
+  const originalValidation = nftFileSchemaValidation(originalDataArray);
+  if (!originalValidation) {
+    const originalArrayErrors: {
+      description: string;
+      errors: string[];
+    } = {
+      description: "Invalid OriginalDataArray",
+      errors: [],
+    };
+
+    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+      if (error.message) {
+        originalArrayErrors.errors.push(error.message);
+      }
+    }
+
+    nftFileSchemaValidation.errors = [];
+    errors.push(originalArrayErrors);
+    console.log(errors);
+  }
+
+  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
+  if (!modifiedValidation) {
+    const modifiedArrayErrors: {
+      description: string;
+      errors: string[];
+    } = {
+      description: "Invalid ModifiedDataArray",
+      errors: [],
+    };
+
+    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+      if (error.message) {
+        modifiedArrayErrors.errors.push(error.message);
+      }
+    }
+
+    nftFileSchemaValidation.errors = [];
+    errors.push(modifiedArrayErrors);
+    console.log(errors);
+  }
+
+  if (!originalValidation || !modifiedValidation) {
+    throw errors;
+  }
+
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
   const originalsMap: Map<NftData> = {};
@@ -64,8 +124,10 @@ export const compareNftGroups = (
       batchDiff.summary[change.key] = summaryAtKey ? summaryAtKey + 1 : 1;
     });
 
-    // add this diff to the total number of diffs
-    batchDiff.diffs.push(diff);
+    // add this diff to the total number of diffs if it has any changes
+    if (diff.changes.length) {
+      batchDiff.diffs.push(diff);
+    }
 
     // remove this NFT from the modified map
     // so that we can check for extras at the end
@@ -79,10 +141,10 @@ export const compareNftFiles = (
   originalFile: string,
   modifiedFile: string
 ): NftBatchDiff => {
-  const file1Nfts: { nfts: NftData[] } = JSON.parse(
+  const file1Nfts: NftFileData = JSON.parse(
     fs.readFileSync(originalFile).toString()
   );
-  const file2Nfts: { nfts: NftData[] } = JSON.parse(
+  const file2Nfts: NftFileData = JSON.parse(
     fs.readFileSync(modifiedFile).toString()
   );
 

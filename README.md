@@ -11,3 +11,4 @@ Required cmd arguments: <br>
 
 optional cmd arguments:<br>
 `--(o | outputFile) "optional output file here, giving no file will print to console"`
+`--(v | verbose) Enables verbose logging`

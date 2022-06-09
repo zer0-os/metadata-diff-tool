@@ -1,4 +1,4 @@
-import { MetadataChange } from "./metadataChangeTypes";
+import { MetadataChange } from "./";
 
 export interface MetadataDiff {
   changes: MetadataChange[];

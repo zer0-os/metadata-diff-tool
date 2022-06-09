@@ -1,0 +1,72 @@
+{
+  "nfts":[
+    {
+      "id": "0xc460135eb3b151e0ed1805b34303ea4482a3f0b1c1fa484a9d7839a32519e8ef",
+      "domain": "wilder.wheels.genesis.3936",
+      "metadata": {
+        "name": "W40 1987",
+        "description": "Werrari",
+        "image": "ipfs://QmR1REpNykLqi2cAnfCjM24ruB3AVVgMbBffny1kZi9Xgu",
+        "stakingRequests": "disabled",
+        "attributes": [
+          {
+            "trait_type": "Car Name",
+            "value": "Werrari W40 1987"
+          },
+          {
+            "trait_type": "Rim",
+            "value": "Type 1"
+          },
+          {
+            "trait_type": "Bonnet",
+            "value": "Stock"
+          },
+          {
+            "trait_type": "Bull Bar",
+            "value": "Stock"
+          },
+          {
+            "trait_type": "Rear Bar",
+            "value": "Stock"
+          },
+          {
+            "trait_type": "Spoiler",
+            "value": "Stock"
+          },
+          {
+            "trait_type": "Environment",
+            "value": "Purple Studio"
+          },
+          {
+            "trait_type": "Pattern",
+            "value": "Light"
+          },
+          {
+            "trait_type": "Wilder Logo Color",
+            "value": "Orange"
+          },
+          {
+            "trait_type": "Tire and Rim Color",
+            "value": "Orange"
+          },
+          {
+            "trait_type": "Color",
+            "value": "Dreams"
+          },
+          {
+            "trait_type": "Headlight Color",
+            "value": "Cool White"
+          },
+          {
+            "trait_type": "Number Plate",
+            "value": "0448 0234"
+          },
+          {
+            "trait_type": "Number Plate Color",
+            "value": "Blue"
+          }
+        ]
+      }
+    }
+  ]
+}

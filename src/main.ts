@@ -8,12 +8,18 @@ const writeDiffToFile = (
   file2: string,
   outFile: string | undefined
 ) => {
-  const diff = compareNftFiles(file1, file2);
+  try {
+    const diff = compareNftFiles(file1, file2);
 
-  if (outFile === undefined) {
-    console.log(diff);
-  } else {
-    fs.writeFileSync(outFile, JSON.stringify(diff, null, 2));
+    if (outFile === undefined) {
+      console.log(diff);
+    } else {
+      fs.writeFileSync(outFile, JSON.stringify(diff, null, 2));
+    }
+  } catch (e) {
+    if (outFile !== undefined) {
+      fs.writeFileSync(outFile, JSON.stringify(e, null, 2));
+    }
   }
 };
 
