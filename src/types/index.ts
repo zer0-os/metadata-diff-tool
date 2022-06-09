@@ -10,3 +10,4 @@ export * from "./logger";
 export * from "./maybe";
 export * from "./databaseNft";
 export * from "./ajvError";
+export * from "./updatedNftData";

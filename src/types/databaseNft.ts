@@ -1,5 +1,10 @@
+import { NftData } from "./";
+
 export interface DatabaseNft {
   domain: string;
-  metadataUri: string;
-  blockNumber: number;
+  id: string;
+  versions: {
+    metadataUri: string;
+    blockNumber: number;
+  }[];
 }

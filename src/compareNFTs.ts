@@ -183,6 +183,6 @@ export const calculateDiff = (
   logger: Logger
 ): NftBatchDiff => {
   // Get current NFT from database
-  const originalNfts = getNftsFromDatabase(modifiedNfts, logger);
+  const originalNfts = getNftArrayFromDatabase(modifiedNfts, logger);
   return compareNftGroups(originalNfts, modifiedNfts, logger);
 };
