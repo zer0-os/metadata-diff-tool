@@ -17,8 +17,8 @@ const writeDiffToFile = (
       fs.writeFileSync(outFile, JSON.stringify(diff, null, 2));
     }
   } catch (e) {
-    if (e instanceof Error && outFile !== undefined) {
-      fs.writeFileSync(outFile, JSON.stringify({ Error: e.message }, null, 2));
+    if (outFile !== undefined) {
+      fs.writeFileSync(outFile, JSON.stringify(e, null, 2));
     }
   }
 };
