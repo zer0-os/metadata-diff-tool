@@ -1,5 +1,6 @@
 export interface UpdatedNftData {
-  domian: string;
+  domain: string;
+  id: string;
   metadataUri: string;
   blockNumber: number;
 }

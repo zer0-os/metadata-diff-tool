@@ -1,5 +1,13 @@
 import { JSONSchemaType } from "ajv";
-import { Metadata, MetadataAttribute, NftData, NftFileData } from "./types";
+import { required } from "yargs";
+import {
+  DatabaseNft,
+  DatabaseNftVersion,
+  Metadata,
+  MetadataAttribute,
+  NftData,
+  NftFileData,
+} from "./types";
 
 const metadataAttributeSchema: JSONSchemaType<MetadataAttribute> = {
   type: "object",
@@ -47,4 +55,27 @@ export const nftSchema: JSONSchemaType<NftData> = {
 export const nftArraySchema: JSONSchemaType<NftData[]> = {
   type: "array",
   items: nftSchema,
+};
+
+const databaseNftVersionSchema: JSONSchemaType<DatabaseNftVersion> = {
+  type: "object",
+  properties: {
+    metadataUri: { type: "string" },
+    blockNumber: { type: "number" },
+  },
+  required: ["metadataUri", "blockNumber"],
+};
+
+export const databaseNftSchema: JSONSchemaType<DatabaseNft> = {
+  type: "object",
+  properties: {
+    domain: { type: "string" },
+    id: { type: "string" },
+    versions: {
+      type: "array",
+      minItems: 0,
+      items: databaseNftVersionSchema,
+    },
+  },
+  required: ["domain", "id", "versions"],
 };

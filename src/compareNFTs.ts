@@ -177,12 +177,3 @@ export const compareNftFiles = (
 
   return compareNftGroups(file1Nfts.nfts, file2Nfts.nfts, logger);
 };
-
-export const calculateDiff = (
-  modifiedNfts: NftData[],
-  logger: Logger
-): NftBatchDiff => {
-  // Get current NFT from database
-  const originalNfts = getNftArrayFromDatabase(modifiedNfts, logger);
-  return compareNftGroups(originalNfts, modifiedNfts, logger);
-};

@@ -4,6 +4,7 @@ import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
 import { Logger } from "./types";
 import "dotenv/config";
+import { updateDatabase } from "./databaseAccess";
 
 const writeDiffToFile = (
   file1: string,
@@ -11,6 +12,10 @@ const writeDiffToFile = (
   outFile: string | undefined,
   logger: Logger
 ) => {
+  updateDatabase([
+    { domain: "Test", id: "0xFF", blockNumber: 10, metadataUri: "test" },
+  ]);
+
   try {
     const diff = compareNftFiles(file1, file2, logger);
 

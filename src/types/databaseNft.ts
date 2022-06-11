@@ -1,10 +1,12 @@
-import { NftData } from "./";
+import { WithId, Document } from "mongodb";
 
-export interface DatabaseNft {
+export interface DatabaseNftVersion {
+  metadataUri: string;
+  blockNumber: number;
+}
+
+export interface DatabaseNft extends WithId<Document> {
   domain: string;
   id: string;
-  versions: {
-    metadataUri: string;
-    blockNumber: number;
-  }[];
+  versions: DatabaseNftVersion[];
 }
