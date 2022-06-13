@@ -13,6 +13,8 @@ export class AjvError<T> {
         this.errors.push(error.message);
       }
     }
+
+    ajvVerification.errors = [];
   }
 
   description: string;

@@ -7,11 +7,14 @@ import {
   Map,
   NftFileData,
   Logger,
+  AjvError,
 } from "./types";
 import Ajv, { DefinedError } from "ajv";
 import { nftArraySchema } from "./ajvSchemas";
+import { getNftArrayFromDatabase } from "./databaseAccess";
 
 const ajv = new Ajv();
+const nftArraySchemaValidation = ajv.compile(nftArraySchema);
 
 const compareNfts = (
   original: NftData,
@@ -49,13 +52,28 @@ const compareNfts = (
   return diff;
 };
 
+const readNftFile = (file: string): NftData[] => {
+  const fileNfts: NftFileData = JSON.parse(fs.readFileSync(file).toString());
+  if (!nftArraySchemaValidation(fileNfts.nfts)) {
+    throw new AjvError(
+      `Invalid nft array in [${file}]`,
+      nftArraySchemaValidation
+    );
+  }
+
+  return fileNfts.nfts;
+};
+
 export const compareNftGroups = (
   originalDataArray: NftData[],
   modifiedDataArray: NftData[],
   logger: Logger
 ): NftBatchDiff => {
-  // compile the nft Schema
-  const nftFileSchemaValidation = ajv.compile(nftArraySchema);
+  if (originalDataArray.length < modifiedDataArray.length) {
+    throw Error(
+      "Modified data array larger than original, modified data array must be a subset of the original array"
+    );
+  }
 
   const errors: {
     description: string;
@@ -64,7 +82,7 @@ export const compareNftGroups = (
 
   // validate both arrays
   logger("Validating Original NFT Data Array");
-  const originalValidation = nftFileSchemaValidation(originalDataArray);
+  const originalValidation = nftArraySchemaValidation(originalDataArray);
   if (!originalValidation) {
     const originalArrayErrors: {
       description: string;
@@ -74,18 +92,18 @@ export const compareNftGroups = (
       errors: [],
     };
 
-    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+    for (const error of nftArraySchemaValidation.errors as DefinedError[]) {
       if (error.message) {
         originalArrayErrors.errors.push(error.message);
       }
     }
 
-    nftFileSchemaValidation.errors = [];
+    nftArraySchemaValidation.errors = [];
     errors.push(originalArrayErrors);
     logger(errors);
   }
 
-  const modifiedValidation = nftFileSchemaValidation(modifiedDataArray);
+  const modifiedValidation = nftArraySchemaValidation(modifiedDataArray);
   if (!modifiedValidation) {
     const modifiedArrayErrors: {
       description: string;
@@ -95,13 +113,13 @@ export const compareNftGroups = (
       errors: [],
     };
 
-    for (const error of nftFileSchemaValidation.errors as DefinedError[]) {
+    for (const error of nftArraySchemaValidation.errors as DefinedError[]) {
       if (error.message) {
         modifiedArrayErrors.errors.push(error.message);
       }
     }
 
-    nftFileSchemaValidation.errors = [];
+    nftArraySchemaValidation.errors = [];
     errors.push(modifiedArrayErrors);
     logger(errors);
   }
@@ -166,14 +184,40 @@ export const compareNftFiles = (
   modifiedFile: string,
   logger: Logger
 ): NftBatchDiff => {
-  const file1Nfts: NftFileData = JSON.parse(
-    fs.readFileSync(originalFile).toString()
-  );
-  const file2Nfts: NftFileData = JSON.parse(
-    fs.readFileSync(modifiedFile).toString()
-  );
-
   logger(`Comparing NFT Files [${originalFile}] and [${modifiedFile}]`);
 
-  return compareNftGroups(file1Nfts.nfts, file2Nfts.nfts, logger);
+  return compareNftGroups(
+    readNftFile(originalFile),
+    readNftFile(modifiedFile),
+    logger
+  );
+};
+
+export const compareNftGroupToDatabase = async (
+  modifiedNfts: NftData[],
+  logger: Logger
+): Promise<NftBatchDiff> => {
+  const nftDataForDatabase: { domain: string; id: string }[] = [];
+
+  for (const modified of modifiedNfts) {
+    nftDataForDatabase.push({
+      domain: modified.domain ? modified.domain : "",
+      id: modified.id,
+    });
+  }
+
+  const databaseNfts = await getNftArrayFromDatabase(
+    nftDataForDatabase,
+    logger
+  );
+
+  return compareNftGroups(databaseNfts, modifiedNfts, logger);
+};
+
+export const compareNftFileToDatabase = async (
+  modifiedFile: string,
+  logger: Logger
+): Promise<NftBatchDiff> => {
+  const modifiedNfts = readNftFile(modifiedFile);
+  return compareNftGroupToDatabase(modifiedNfts, logger);
 };

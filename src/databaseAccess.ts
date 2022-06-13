@@ -10,6 +10,7 @@ import {
 import * as mongoDb from "mongodb";
 import { databaseNftSchema } from "./ajvSchemas";
 import { getMetadataFromIpfs } from "./ipfsAccess";
+import "dotenv/config";
 
 const ajv = new Ajv();
 const databaseNftVerification = ajv.compile(databaseNftSchema);
@@ -173,19 +174,21 @@ export const getNftVersionFromDatabase = async (
 export const getNftArrayFromDatabase = async (
   nfts: { domain: string; id: string }[],
   logger: Logger
-): Promise<Maybe<NftData>[]> => {
+): Promise<NftData[]> => {
   logger("Getting Nft Array from database");
 
-  const array: Maybe<NftData>[] = [];
+  const array: NftData[] = [];
   for (const nft of nfts) {
-    array.push(
-      await getNftVersionFromDatabase(
-        nft.domain,
-        nft.id,
-        Number.MAX_SAFE_INTEGER,
-        logger
-      )
+    const databaseNft = await getNftVersionFromDatabase(
+      nft.domain,
+      nft.id,
+      Number.MAX_SAFE_INTEGER,
+      logger
     );
+
+    if (databaseNft) {
+      array.push(databaseNft);
+    }
   }
 
   return array;
