@@ -5,7 +5,7 @@ export interface DatabaseNftVersion {
   blockNumber: number;
 }
 
-export interface DatabaseNft extends WithId<Document> {
+export interface DatabaseNft {
   domain: string;
   id: string;
   versions: DatabaseNftVersion[];

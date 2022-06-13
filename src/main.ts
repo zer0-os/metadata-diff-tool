@@ -4,7 +4,8 @@ import { hideBin } from "yargs/helpers";
 import * as fs from "fs";
 import { Logger } from "./types";
 import "dotenv/config";
-import { updateDatabase } from "./databaseAccess";
+import { getNftArrayFromDatabase, updateDatabase } from "./databaseAccess";
+import { stdout } from "process";
 
 const writeDiffToFile = (
   file1: string,
@@ -12,10 +13,6 @@ const writeDiffToFile = (
   outFile: string | undefined,
   logger: Logger
 ) => {
-  updateDatabase([
-    { domain: "Test", id: "0xFF", blockNumber: 10, metadataUri: "test" },
-  ]);
-
   try {
     const diff = compareNftFiles(file1, file2, logger);
 
@@ -71,3 +68,15 @@ yargs(hideBin(process.argv))
     description: "Run with verbose logging",
   })
   .parse();
+
+const test = getNftArrayFromDatabase(
+  [
+    { domain: "Test", id: "0xFF" },
+    { domain: "TestInsert", id: "TestId" },
+  ],
+  console.debug
+);
+
+test.finally(() => {
+  console.log(test);
+});

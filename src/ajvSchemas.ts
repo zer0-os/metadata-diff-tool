@@ -19,7 +19,7 @@ const metadataAttributeSchema: JSONSchemaType<MetadataAttribute> = {
   additionalProperties: false,
 };
 
-const metadataSchema: JSONSchemaType<Metadata> = {
+export const metadataSchema: JSONSchemaType<Metadata> = {
   type: "object",
   properties: {
     name: { type: "string" },

@@ -1,21 +1,21 @@
 import Ajv from "ajv";
 import axios from "axios";
-import { nftSchema } from "./ajvSchemas";
-import { Maybe, NftData, AjvError, Logger } from "./types";
+import { metadataSchema } from "./ajvSchemas";
+import { Maybe, NftData, AjvError, Logger, Metadata } from "./types";
 
 const ajv = new Ajv();
-const nftDataVerification = ajv.compile(nftSchema);
+const metadataVerification = ajv.compile(metadataSchema);
 
 const delay = async (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
 
-export const getNftFromIpfs = async (
+export const getMetadataFromIpfs = async (
   ipfsAddress: string,
   timeoutStep: number,
   maxTimeouts: number,
   logger: Logger
-): Promise<Maybe<NftData>> => {
+): Promise<Maybe<Metadata>> => {
   const ipfsPrefix = process.env.ipfsPrefix;
   const gatewayPrefix = process.env.ipfsGatewayUrlPrefix;
 
@@ -29,25 +29,26 @@ export const getNftFromIpfs = async (
   const mainUrl = ipfsAddress.slice(prefixIndex + ipfsPrefix.length);
   const fullUrl = gatewayPrefix + mainUrl;
 
-  logger(`Looking for NFT at [${fullUrl}]`);
+  logger(`Looking for Metadata at [${fullUrl}]`);
 
-  let nft: Maybe<NftData> = undefined;
+  let metadata: Maybe<Metadata> = undefined;
 
   for (let i = 0; i < maxTimeouts; ++i) {
-    nft = (await axios.get(fullUrl)).data;
+    metadata = (await axios.get(fullUrl)).data;
 
-    if (!nft) {
+    if (!metadata) {
       delay((i + 1) * timeoutStep);
     } else break;
   }
 
-  if (nft && !nftDataVerification(nft)) {
-    throw new AjvError("Invalid NFT found in database", nftDataVerification);
+  if (metadata && !metadataVerification(metadata)) {
+    throw new AjvError(
+      "Invalid Metadata found in database",
+      metadataVerification
+    );
+  } else if (!metadata) {
+    logger(`Could not retrive Metadata at [${fullUrl}]`);
   }
 
-  if (!nft) {
-    logger(`Could not retrive NFT at [${fullUrl}]`);
-  }
-
-  return nft;
+  return metadata;
 };
