@@ -1,17 +1,17 @@
+import Ajv from "ajv";
 import * as fs from "fs";
+import { nftArraySchema } from "./ajvSchemas";
 import { compareMetadataGeneric } from "./compareMetadata";
+import { getNftArrayFromDatabase } from "./databaseAccess";
 import {
+  AjvError,
+  Logger,
+  Map,
+  NftBatchDiff,
   NftData,
   NftDiff,
-  NftBatchDiff,
-  Map,
   NftFileData,
-  Logger,
-  AjvError,
 } from "./types";
-import Ajv, { DefinedError } from "ajv";
-import { nftArraySchema } from "./ajvSchemas";
-import { getNftArrayFromDatabase } from "./databaseAccess";
 
 const ajv = new Ajv();
 const nftArraySchemaValidation = ajv.compile(nftArraySchema);
@@ -84,42 +84,23 @@ export const compareNftGroups = (
   logger("Validating Original NFT Data Array");
   const originalValidation = nftArraySchemaValidation(originalDataArray);
   if (!originalValidation) {
-    const originalArrayErrors: {
-      description: string;
-      errors: string[];
-    } = {
-      description: "Invalid OriginalDataArray",
-      errors: [],
-    };
-
-    for (const error of nftArraySchemaValidation.errors as DefinedError[]) {
-      if (error.message) {
-        originalArrayErrors.errors.push(error.message);
-      }
-    }
+    const error = new AjvError(
+      "Invalid OriginalDataArray",
+      nftArraySchemaValidation
+    );
 
     nftArraySchemaValidation.errors = [];
-    errors.push(originalArrayErrors);
+    errors.push(error);
     logger(errors);
   }
 
   const modifiedValidation = nftArraySchemaValidation(modifiedDataArray);
   if (!modifiedValidation) {
-    const modifiedArrayErrors: {
-      description: string;
-      errors: string[];
-    } = {
-      description: "Invalid ModifiedDataArray",
-      errors: [],
-    };
+    const modifiedArrayErrors = new AjvError(
+      "Invalid ModifiedDataArray",
+      nftArraySchemaValidation
+    );
 
-    for (const error of nftArraySchemaValidation.errors as DefinedError[]) {
-      if (error.message) {
-        modifiedArrayErrors.errors.push(error.message);
-      }
-    }
-
-    nftArraySchemaValidation.errors = [];
     errors.push(modifiedArrayErrors);
     logger(errors);
   }

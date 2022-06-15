@@ -1,12 +1,10 @@
 import { JSONSchemaType } from "ajv";
-import { required } from "yargs";
 import {
   DatabaseNft,
   DatabaseNftVersion,
   Metadata,
   MetadataAttribute,
   NftData,
-  NftFileData,
 } from "./types";
 
 const metadataAttributeSchema: JSONSchemaType<MetadataAttribute> = {

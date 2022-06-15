@@ -1,7 +1,7 @@
 import Ajv from "ajv";
 import axios from "axios";
 import { metadataSchema } from "./ajvSchemas";
-import { Maybe, NftData, AjvError, Logger, Metadata } from "./types";
+import { AjvError, Logger, Maybe, Metadata } from "./types";
 
 const ajv = new Ajv();
 const metadataVerification = ajv.compile(metadataSchema);
@@ -34,7 +34,8 @@ export const getMetadataFromIpfs = async (
   let metadata: Maybe<Metadata> = undefined;
 
   for (let i = 0; i < maxTimeouts; ++i) {
-    metadata = (await axios.get(fullUrl)).data;
+    const websiteResult = await axios.get(fullUrl);
+    metadata = websiteResult.data;
 
     if (!metadata) {
       delay((i + 1) * timeoutStep);

@@ -1,4 +1,4 @@
-import Ajv, { ValidateFunction } from "ajv";
+import { ValidateFunction } from "ajv";
 
 export class AjvError<T> {
   constructor(description: string, ajvVerification: ValidateFunction<T>) {

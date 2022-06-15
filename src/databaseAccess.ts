@@ -60,7 +60,7 @@ const getDatabaseNFT = async (
     return undefined;
   } finally {
     logger("Disconnecting from MongoDb client");
-    client.close();
+    await client.close();
   }
 };
 

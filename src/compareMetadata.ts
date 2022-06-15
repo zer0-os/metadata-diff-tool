@@ -1,12 +1,12 @@
 import {
+  Logger,
+  Map,
   Metadata,
   MetadataAttribute,
-  MetadataChangeModify,
   MetadataChange,
-  MetadataChangeRemove,
   MetadataChangeAdd,
-  Map,
-  Logger,
+  MetadataChangeModify,
+  MetadataChangeRemove,
 } from "./types";
 
 const compareMetadataAttributes = (

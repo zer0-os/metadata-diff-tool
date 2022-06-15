@@ -1,10 +1,9 @@
-import { compareNftFiles, compareNftFileToDatabase } from "./compareNfts";
-import yargs, { nargs } from "yargs";
-import { hideBin } from "yargs/helpers";
-import * as fs from "fs";
-import { Logger, Maybe, NftBatchDiff } from "./types";
 import "dotenv/config";
-import { getNftArrayFromDatabase } from "./databaseAccess";
+import * as fs from "fs";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import { compareNftFiles, compareNftFileToDatabase } from "./compareNfts";
+import { Logger, Maybe, NftBatchDiff } from "./types";
 
 const writeDiffToFile = (
   diff: NftBatchDiff,
@@ -84,15 +83,3 @@ yargs(hideBin(process.argv))
     description: "Run with verbose logging",
   })
   .parse();
-
-const test = getNftArrayFromDatabase(
-  [
-    { domain: "Test", id: "0xFF" },
-    { domain: "TestInsert", id: "TestId" },
-  ],
-  console.debug
-);
-
-test.finally(() => {
-  console.log(test);
-});
