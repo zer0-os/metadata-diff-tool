@@ -1,4 +1,4 @@
-import { Metadata } from "./";
+import { Metadata } from "..";
 
 export interface NftData {
   domain?: string;

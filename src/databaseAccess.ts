@@ -6,190 +6,157 @@ import {
   Logger,
   UpdatedNftData,
   AjvError,
+  databaseNftSchema,
 } from "./types";
 import * as mongoDb from "mongodb";
-import { databaseNftSchema } from "./ajvSchemas";
 import { getMetadataFromIpfs } from "./ipfsAccess";
-import "dotenv/config";
+import { getDatabaseEnvVars } from "./utility";
 
 const ajv = new Ajv();
 const databaseNftVerification = ajv.compile(databaseNftSchema);
 
-const dbConnectionString = process.env.DB_CONN_STRING;
-const dbName = process.env.DB_NAME;
-const dbCollectionName = process.env.DB_COLLECTION_NAME;
-
-if (!dbConnectionString) {
-  throw Error("No DB_CONN_STRING in .env file");
-} else if (!dbName) {
-  throw Error("No DB_NAME in .env file");
-} else if (!dbCollectionName) {
-  throw Error("No DB_COLLECTION_NAME in .env file");
-}
-
 const getDatabaseNFT = async (
-  domain: string,
+  client: mongoDb.MongoClient,
   id: string,
   logger: Logger
 ): Promise<Maybe<DatabaseNft>> => {
-  const client = new mongoDb.MongoClient(dbConnectionString);
+  const dbVars = getDatabaseEnvVars();
 
-  try {
-    logger("Attempting to connect to MongoDb");
-    await client.connect();
+  const collection = client.db(dbVars.name).collection(dbVars.collection);
 
-    const collection = client.db(dbName).collection(dbCollectionName);
+  logger(`Searching MongoDb for NFT with id [${id}]`);
+  const nft = await collection.findOne<DatabaseNft>({
+    id: id,
+  });
 
-    logger(`Searching MongoDb for NFT with domain [${domain}] and id [${id}]`);
-    const nft = await collection.findOne<DatabaseNft>({
-      domain: domain,
-      id: id,
-    });
-
-    if (nft) {
-      if (!databaseNftVerification(nft)) {
-        throw new AjvError(
-          "NFT from database was not valid",
-          databaseNftVerification
-        );
-      }
-
-      return nft;
+  if (nft) {
+    if (!databaseNftVerification(nft)) {
+      throw new AjvError(
+        "NFT from database was not valid",
+        databaseNftVerification
+      );
     }
 
-    return undefined;
+    return nft;
+  }
+
+  return undefined;
+};
+
+import axios, { AxiosRequestConfig } from "axios";
+
+export const updateDatabase = async (metadataChanges: UpdatedNftData[]) => {
+  try {
+    const config: AxiosRequestConfig = {
+      maxRedirects: 0,
+    };
+    const test = await axios.get(
+      "https://ipfs.io/ipfs/QmPh6EjzvgUQhYP9wz4JDprEMvXRp7xg15aQM3NtygNca7",
+      config
+    );
+    console.log(test);
+  } catch (e: any) {
+    console.log(e);
+  }
+
+  const dbVars = getDatabaseEnvVars();
+  const client = new mongoDb.MongoClient(dbVars.connection);
+
+  try {
+    await client.connect();
+    const collection = client.db(dbVars.name).collection(dbVars.collection);
+    await collection.deleteMany({});
+
+    const databaseNfts: DatabaseNft[] = [];
+
+    for (const change of metadataChanges) {
+      const metadata = await getMetadataFromIpfs(
+        change.metadataUri,
+        0,
+        1,
+        console.debug
+      );
+
+      if (!metadata) {
+        continue;
+      }
+
+      const databaseNft: DatabaseNft = {
+        id: change.id,
+        metadataUri: change.metadataUri,
+        blockNumber: change.blockNumber,
+        metadata: metadata,
+      };
+
+      databaseNfts.push(databaseNft);
+    }
+
+    await collection.insertMany(databaseNfts);
   } finally {
-    logger("Disconnecting from MongoDb client");
     await client.close();
   }
 };
 
-const updateOneNft = async (
-  collection: mongoDb.Collection,
-  change: UpdatedNftData
-) => {
-  let nft = await collection.findOne<DatabaseNft>({
-    domain: change.domain,
-    id: change.id,
-  });
-
-  if (!nft) {
-    nft = {
-      domain: change.domain,
-      id: change.id,
-      versions: [
-        {
-          metadataUri: change.metadataUri,
-          blockNumber: change.blockNumber,
-        },
-      ],
-    };
-
-    await collection.insertOne(nft);
-  } else if (!databaseNftVerification(nft)) {
-    throw new AjvError(
-      `Nft does not fulfill the database Nft Schema`,
-      databaseNftVerification
-    );
-  } else {
-    nft.versions.push({
-      metadataUri: change.metadataUri,
-      blockNumber: change.blockNumber,
-    });
-
-    await collection.updateOne(
-      { domain: nft.domain, id: nft.id },
-      { $set: { versions: nft.versions } }
-    );
-  }
-};
-
-export const updateDatabase = async (metadataChanges: UpdatedNftData[]) => {
-  const client = new mongoDb.MongoClient(dbConnectionString);
-
-  try {
-    await client.connect();
-
-    const collection = client.db(dbName).collection(dbCollectionName);
-
-    for (const change of metadataChanges) {
-      updateOneNft(collection, change);
-    }
-  } finally {
-    client.close();
-  }
-};
-
 export const getNftVersionFromDatabase = async (
-  domain: string,
+  client: mongoDb.MongoClient,
   id: string,
-  blockNumber: number,
+  blockNumber: number = Number.MAX_SAFE_INTEGER,
   logger: Logger
 ): Promise<Maybe<NftData>> => {
-  logger(`Looking for NFT [${domain}] in database`);
+  logger(`Looking for NFT [${id}] in database`);
+  const dbVars = getDatabaseEnvVars();
+  const collection = client.db(dbVars.name).collection(dbVars.collection);
 
-  const databaseNft: Maybe<DatabaseNft> = await getDatabaseNFT(
-    domain,
-    id,
-    logger
-  );
+  const databaseNfts = await collection.find<DatabaseNft>({ id: id });
 
-  if (!databaseNft) {
-    return undefined;
-  }
+  let closestNft: Maybe<DatabaseNft>;
 
-  let i = databaseNft.versions.length - 1;
-  for (i; i >= 0; --i) {
-    // find the first block that is less than or equal to the block
-    // we're looking for
-    if (databaseNft.versions[i].blockNumber <= blockNumber) {
-      break;
+  await databaseNfts.forEach((data) => {
+    if (
+      data.blockNumber < blockNumber &&
+      (!closestNft || data.blockNumber > closestNft.blockNumber)
+    ) {
+      closestNft = data;
     }
-  }
+  });
 
-  if (i < 0) {
+  if (!closestNft) {
+    logger(`NFT with id [${id}] did not exist at block [${blockNumber}]`);
+  } else {
     logger(
-      `NFT with domain [${domain}] and id [${id}] did not exist at block [${blockNumber}]`
+      `last update before block [${blockNumber}] was in block [${closestNft.blockNumber}]`
     );
   }
-  const nftVersion = databaseNft.versions[i];
-  logger(
-    `last update before block [${blockNumber}] was in block [${nftVersion.blockNumber}]`
-  );
 
-  const metadata = await getMetadataFromIpfs(
-    nftVersion.metadataUri,
-    5000,
-    3,
-    logger
-  );
-
-  if (!metadata) {
-    return undefined;
-  }
-
-  return { domain: domain, id: id, metadata: metadata };
+  return closestNft;
 };
 
-export const getNftArrayFromDatabase = async (
-  nfts: { domain: string; id: string }[],
+export const getNftsFromDatabase = async (
+  nfts: { id: string }[],
   logger: Logger
 ): Promise<NftData[]> => {
   logger("Getting Nft Array from database");
+  const dbVars = getDatabaseEnvVars();
+  const client = new mongoDb.MongoClient(dbVars.connection);
+  try {
+    await client.connect();
+    const array: NftData[] = [];
 
-  const array: NftData[] = [];
-  for (const nft of nfts) {
-    const databaseNft = await getNftVersionFromDatabase(
-      nft.domain,
-      nft.id,
-      Number.MAX_SAFE_INTEGER,
-      logger
-    );
+    for (const nft of nfts) {
+      const databaseNft = await getNftVersionFromDatabase(
+        client,
+        nft.id,
+        undefined,
+        logger
+      );
 
-    if (databaseNft) {
-      array.push(databaseNft);
+      if (databaseNft) {
+        array.push(databaseNft);
+      }
     }
-  }
 
-  return array;
+    return array;
+  } finally {
+    await client.close();
+  }
 };

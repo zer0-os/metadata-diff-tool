@@ -1,14 +1,10 @@
 import Ajv from "ajv";
-import axios from "axios";
-import { metadataSchema } from "./ajvSchemas";
-import { AjvError, Logger, Maybe, Metadata } from "./types";
+import axios, { AxiosRequestConfig } from "axios";
+import { AjvError, Logger, Maybe, Metadata, metadataSchema } from "./types";
+import { delay, getIpfsEnvGateway } from "./utility";
 
 const ajv = new Ajv();
 const metadataVerification = ajv.compile(metadataSchema);
-
-const delay = async (ms: number) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 export const getMetadataFromIpfs = async (
   ipfsAddress: string,
@@ -16,30 +12,26 @@ export const getMetadataFromIpfs = async (
   maxTimeouts: number,
   logger: Logger
 ): Promise<Maybe<Metadata>> => {
-  const ipfsPrefix = process.env.ipfsPrefix;
-  const gatewayPrefix = process.env.ipfsGatewayUrlPrefix;
+  const ipfsGatewayPrefix = getIpfsEnvGateway();
 
-  if (!ipfsPrefix) {
-    throw Error("No ipfsPrefix in environment variables");
-  } else if (!gatewayPrefix) {
-    throw Error("No ipfsGatewayUrlPrefix in environment variables");
-  }
+  // match anything up to and including ipfs:// or ipfs/
+  const ipfsRegex = /(.*ipfs:\/\/)|(.*ipfs\/)/gi;
 
-  const prefixIndex = ipfsAddress.indexOf(ipfsPrefix);
-  const mainUrl = ipfsAddress.slice(prefixIndex + ipfsPrefix.length);
-  const fullUrl = gatewayPrefix + mainUrl;
+  const fullUrl = ipfsAddress.replace(ipfsRegex, ipfsGatewayPrefix);
 
   logger(`Looking for Metadata at [${fullUrl}]`);
 
-  let metadata: Maybe<Metadata> = undefined;
+  let metadata: Maybe<Metadata>;
 
-  for (let i = 0; i < maxTimeouts; ++i) {
-    const websiteResult = await axios.get(fullUrl);
-    metadata = websiteResult.data;
+  for (let i = 0; i < maxTimeouts && !metadata; ++i) {
+    await delay(i * timeoutStep);
 
-    if (!metadata) {
-      delay((i + 1) * timeoutStep);
-    } else break;
+    try {
+      const websiteResult = await axios.get<Metadata>(fullUrl);
+      metadata = websiteResult.data;
+    } catch (e) {
+      logger(e);
+    }
   }
 
   if (metadata && !metadataVerification(metadata)) {
@@ -49,6 +41,8 @@ export const getMetadataFromIpfs = async (
     );
   } else if (!metadata) {
     logger(`Could not retrive Metadata at [${fullUrl}]`);
+  } else {
+    logger(`Found Metadata as [${fullUrl}]`);
   }
 
   return metadata;

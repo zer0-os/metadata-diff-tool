@@ -2,7 +2,8 @@ import "dotenv/config";
 import * as fs from "fs";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { compareNftFiles, compareNftFileToDatabase } from "./compareNfts";
+import { compareNftFiles, compareNftFileToDatabase } from "./comparers";
+import { updateDatabase } from "./databaseAccess";
 import { Logger, Maybe, NftBatchDiff } from "./types";
 
 const writeDiffToFile = (
@@ -19,19 +20,19 @@ const writeDiffToFile = (
   }
 };
 
-const getDiffAndWriteToFile = (
+const getDiffAndWriteToFile = async (
   originalFile: Maybe<string>,
   changedFile: string,
   outFile: Maybe<string>,
   logger: Logger
 ) => {
   try {
+    await updateDatabase(
+      JSON.parse(fs.readFileSync("./data/nfts.json").toString())
+    );
     if (!originalFile) {
-      const diffPromise = compareNftFileToDatabase(changedFile, logger);
-
-      diffPromise.then((diff) => {
-        writeDiffToFile(diff, outFile, logger);
-      });
+      const diff = await compareNftFileToDatabase(changedFile, logger);
+      writeDiffToFile(diff, outFile, logger);
     } else {
       const diff = compareNftFiles(originalFile, changedFile, logger);
       writeDiffToFile(diff, outFile, logger);

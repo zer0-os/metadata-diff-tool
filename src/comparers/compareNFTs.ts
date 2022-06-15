@@ -1,8 +1,7 @@
 import Ajv from "ajv";
 import * as fs from "fs";
-import { nftArraySchema } from "./ajvSchemas";
-import { compareMetadataGeneric } from "./compareMetadata";
-import { getNftArrayFromDatabase } from "./databaseAccess";
+import { compareMetadataGeneric } from "./";
+import { getNftsFromDatabase } from "../databaseAccess";
 import {
   AjvError,
   Logger,
@@ -11,7 +10,8 @@ import {
   NftData,
   NftDiff,
   NftFileData,
-} from "./types";
+  nftArraySchema,
+} from "../types";
 
 const ajv = new Ajv();
 const nftArraySchemaValidation = ajv.compile(nftArraySchema);
@@ -166,33 +166,30 @@ export const compareNftFiles = (
   logger: Logger
 ): NftBatchDiff => {
   logger(`Comparing NFT Files [${originalFile}] and [${modifiedFile}]`);
-
-  return compareNftGroups(
+  const diff = compareNftGroups(
     readNftFile(originalFile),
     readNftFile(modifiedFile),
     logger
   );
+  return diff;
 };
 
 export const compareNftGroupToDatabase = async (
   modifiedNfts: NftData[],
   logger: Logger
 ): Promise<NftBatchDiff> => {
-  const nftDataForDatabase: { domain: string; id: string }[] = [];
+  const nftDataForDatabase: { id: string }[] = [];
 
   for (const modified of modifiedNfts) {
     nftDataForDatabase.push({
-      domain: modified.domain ? modified.domain : "",
       id: modified.id,
     });
   }
 
-  const databaseNfts = await getNftArrayFromDatabase(
-    nftDataForDatabase,
-    logger
-  );
+  const databaseNfts = await getNftsFromDatabase(nftDataForDatabase, logger);
 
-  return compareNftGroups(databaseNfts, modifiedNfts, logger);
+  const diff = compareNftGroups(databaseNfts, modifiedNfts, logger);
+  return diff;
 };
 
 export const compareNftFileToDatabase = async (
@@ -200,5 +197,6 @@ export const compareNftFileToDatabase = async (
   logger: Logger
 ): Promise<NftBatchDiff> => {
   const modifiedNfts = readNftFile(modifiedFile);
-  return compareNftGroupToDatabase(modifiedNfts, logger);
+  const diff = await compareNftGroupToDatabase(modifiedNfts, logger);
+  return diff;
 };
