@@ -43,29 +43,13 @@ const getDatabaseNFT = async (
   return undefined;
 };
 
-import axios, { AxiosRequestConfig } from "axios";
-
 export const updateDatabase = async (metadataChanges: UpdatedNftData[]) => {
-  try {
-    const config: AxiosRequestConfig = {
-      maxRedirects: 0,
-    };
-    const test = await axios.get(
-      "https://ipfs.io/ipfs/QmPh6EjzvgUQhYP9wz4JDprEMvXRp7xg15aQM3NtygNca7",
-      config
-    );
-    console.log(test);
-  } catch (e: any) {
-    console.log(e);
-  }
-
   const dbVars = getDatabaseEnvVars();
   const client = new mongoDb.MongoClient(dbVars.connection);
 
   try {
     await client.connect();
     const collection = client.db(dbVars.name).collection(dbVars.collection);
-    await collection.deleteMany({});
 
     const databaseNfts: DatabaseNft[] = [];
 

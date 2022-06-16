@@ -25,14 +25,18 @@ const compareNfts = (
     `Validating that [${original.id}] and [${modified.id}] are the same NFT`
   );
 
-  if (original.domain != modified.domain) {
-    throw Error(
-      `Original NFT domain [${original.domain}] and modified NFT domain [${modified.domain}] do not match`
-    );
+  if (
+    original.domain &&
+    modified.domain &&
+    original.domain != modified.domain
+  ) {
+    const error = `Original NFT domain [${original.domain}] and modified NFT domain [${modified.domain}] do not match`;
+    logger(error);
+    throw Error(error);
   } else if (original.id != modified.id) {
-    throw Error(
-      `Original NFT id [${original.id}] and modified NFT id [${modified.id}] do not match`
-    );
+    const error = `Original NFT id [${original.id}] and modified NFT id [${modified.id}] do not match`;
+    logger(error);
+    throw Error(error);
   }
 
   const diff: NftDiff = {

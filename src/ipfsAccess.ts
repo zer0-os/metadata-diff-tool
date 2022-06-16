@@ -27,7 +27,7 @@ export const getMetadataFromIpfs = async (
     await delay(i * timeoutStep);
 
     try {
-      const websiteResult = await axios.get<Metadata>(fullUrl);
+      const websiteResult = await axios.get(fullUrl);
       metadata = websiteResult.data;
     } catch (e) {
       logger(e);

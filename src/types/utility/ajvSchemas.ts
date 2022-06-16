@@ -42,7 +42,6 @@ export const nftSchema: JSONSchemaType<NftData> = {
     metadata: metadataSchema,
   },
   required: ["id", "metadata"],
-  additionalProperties: false,
 };
 
 export const nftArraySchema: JSONSchemaType<NftData[]> = {

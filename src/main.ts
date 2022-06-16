@@ -27,9 +27,6 @@ const getDiffAndWriteToFile = async (
   logger: Logger
 ) => {
   try {
-    await updateDatabase(
-      JSON.parse(fs.readFileSync("./data/nfts.json").toString())
-    );
     if (!originalFile) {
       const diff = await compareNftFileToDatabase(changedFile, logger);
       writeDiffToFile(diff, outFile, logger);
