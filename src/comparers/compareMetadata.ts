@@ -1,13 +1,13 @@
 import {
+  Logger,
+  Map,
   Metadata,
   MetadataAttribute,
-  MetadataChangeModify,
   MetadataChange,
-  MetadataChangeRemove,
   MetadataChangeAdd,
-  Map,
-  Logger,
-} from "./types";
+  MetadataChangeModify,
+  MetadataChangeRemove,
+} from "../types";
 
 const compareMetadataAttributes = (
   originalAttributes: readonly MetadataAttribute[],
@@ -106,7 +106,8 @@ export const compareMetadataGeneric = <
     logger
   );
 
-  return memberChanges.concat(attributeChanges);
+  const changes = memberChanges.concat(attributeChanges);
+  return changes;
 };
 
 export const compareMetadataMembersGeneric = <

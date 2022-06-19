@@ -1,22 +1,38 @@
-import { compareNftFiles } from "./compareNfts";
-import yargs, { nargs } from "yargs";
-import { hideBin } from "yargs/helpers";
+import "dotenv/config";
 import * as fs from "fs";
-import { Logger } from "./types";
+import yargs from "yargs";
+import { hideBin } from "yargs/helpers";
+import { compareNftFiles, compareNftFileToDatabase } from "./comparers";
+import { updateDatabase } from "./databaseAccess";
+import { Logger, Maybe, NftBatchDiff } from "./types";
 
 const writeDiffToFile = (
-  file1: string,
-  file2: string,
-  outFile: string | undefined,
+  diff: NftBatchDiff,
+  outFile: Maybe<string>,
+  logger: Logger
+) => {
+  if (outFile === undefined) {
+    logger("Writing diff to logger");
+    logger(diff);
+  } else {
+    logger(`Writing diff to [${outFile}]`);
+    fs.writeFileSync(outFile, JSON.stringify(diff, null, 2));
+  }
+};
+
+const getDiffAndWriteToFile = async (
+  originalFile: Maybe<string>,
+  changedFile: string,
+  outFile: Maybe<string>,
   logger: Logger
 ) => {
   try {
-    const diff = compareNftFiles(file1, file2, logger);
-
-    if (outFile === undefined) {
-      console.log(diff);
+    if (!originalFile) {
+      const diff = await compareNftFileToDatabase(changedFile, logger);
+      writeDiffToFile(diff, outFile, logger);
     } else {
-      fs.writeFileSync(outFile, JSON.stringify(diff, null, 2));
+      const diff = compareNftFiles(originalFile, changedFile, logger);
+      writeDiffToFile(diff, outFile, logger);
     }
   } catch (e) {
     if (outFile !== undefined) {
@@ -31,15 +47,15 @@ yargs(hideBin(process.argv))
     "Get time based groups for a user",
     (yargs) => {
       return yargs
-        .option("file1", {
-          demandOption: true,
-          alias: "f1",
+        .option("originalFile", {
+          demandOption: false,
+          alias: "of",
           type: "string",
           describe: "The file with the existing data",
         })
-        .option("file2", {
+        .option("modifiedFile", {
           demandOption: true,
-          alias: "f2",
+          alias: "mf",
           type: "string",
           describe: "the file that has the changes you want",
         })
@@ -50,9 +66,9 @@ yargs(hideBin(process.argv))
         });
     },
     (argv) => {
-      writeDiffToFile(
-        argv.file1,
-        argv.file2,
+      getDiffAndWriteToFile(
+        argv.originalFile,
+        argv.modifiedFile,
         argv.outputFile,
         argv.verbose ? console.debug : (message, ...optional): void => {}
       );

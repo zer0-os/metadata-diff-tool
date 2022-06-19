@@ -1,4 +1,4 @@
-import { NftDiff } from "./";
+import { NftDiff } from "..";
 
 export interface NftBatchDiff {
   summary: {

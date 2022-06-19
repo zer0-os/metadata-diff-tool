@@ -1,4 +1,4 @@
-import { MetadataChange } from ".";
+import { MetadataChange } from "..";
 
 export interface NftDiff {
   domain?: string;
