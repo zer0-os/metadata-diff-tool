@@ -1,26 +1,32 @@
 {
+  "name": "@zero-tech/metadata-diff-tool",
+  "version": "0.0.1",
+  "author": "Zer0 Tech",
+  "license": "MIT",
+  "description": "A diff tool that shows the difference between two provided NFT metadata's",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "dependencies": {
     "ajv": "8.11.0",
     "axios": "0.27.2",
     "dotenv": "16.0.1",
     "env-var": "7.1.1",
     "mongodb": "4.7.0",
-    "ts-node": "10.8.0",
-    "tsc": "2.0.4",
-    "typescript": "4.6.4",
     "yargs": "17.5.1"
   },
-  "name": "metadata-diff-tool",
-  "version": "1.0.0",
-  "description": "A diff tool that shows the difference between two provided NFT metadata's",
-  "main": "index.js",
   "devDependencies": {
     "@types/node": "17.0.33",
-    "@types/yargs": "17.0.10"
+    "@types/yargs": "17.0.10",
+    "ts-node": "10.8.0",
+    "tsc": "2.0.4",
+    "typescript": "4.6.4"
   },
   "scripts": {
-    "cli": "ts-node ./src/main.ts"
+    "cli": "ts-node ./src/main.ts",
+    "build": "tsc --build --verbose ./tsconfig.build.json"
   },
-  "author": "Zer0 Tech",
-  "license": "MIT"
+  "files": [
+    "lib",
+    "src"
+  ]
 }

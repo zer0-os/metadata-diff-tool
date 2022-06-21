@@ -1,23 +1,23 @@
 {
   "compilerOptions": {
     "declaration": true,
+    "declarationMap": true,
     "lib": [
       "ES2018"
     ],
     "module": "CommonJS",
     "moduleResolution": "node",
+    "esModuleInterop": true,
     "strict": true,
     "target": "ES2018",
     "sourceMap": true,
     "composite": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    "outDir": "lib",
+    "rootDir": "src",
+    "strictNullChecks": true
   },
   "include": [
-    "src/",
-    "test/"
+    "src"
   ],
   "exclude": [
     "node_modules"
