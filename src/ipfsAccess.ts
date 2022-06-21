@@ -1,5 +1,5 @@
 import Ajv from "ajv";
-import axios, { AxiosRequestConfig } from "axios";
+import axios from "axios";
 import { AjvError, Logger, Maybe, Metadata, metadataSchema } from "./types";
 import { delay, getIpfsEnvGateway } from "./utility";
 

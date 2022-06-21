@@ -70,6 +70,7 @@ yargs(hideBin(process.argv))
         argv.originalFile,
         argv.modifiedFile,
         argv.outputFile,
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         argv.verbose ? console.debug : (message, ...optional): void => {}
       );
       // write to file here
