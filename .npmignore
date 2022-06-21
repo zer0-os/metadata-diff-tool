@@ -9,3 +9,4 @@ tsconfig.build.json
 tsconfig.build.tsbuildinfo
 tests/
 data/
+.env
