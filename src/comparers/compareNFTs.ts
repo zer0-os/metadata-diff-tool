@@ -11,7 +11,10 @@ import {
   NftDiff,
   NftFileData,
   nftArraySchema,
+  Metadata,
 } from "../types";
+import axios from "axios";
+import * as env from "env-var";
 
 const ajv = new Ajv();
 const nftArraySchemaValidation = ajv.compile(nftArraySchema);
@@ -202,5 +205,42 @@ export const compareNftFileToDatabase = async (
 ): Promise<NftBatchDiff> => {
   const modifiedNfts = readNftFile(modifiedFile);
   const diff = await compareNftGroupToDatabase(modifiedNfts, logger);
+  return diff;
+};
+
+interface PostReturn {
+  warnings: string;
+  metadata: Map<Metadata>;
+}
+
+export const compareNftsToMetadataService = async (
+  modifiedNfts: NftData[],
+  logger: Logger
+): Promise<NftBatchDiff> => {
+  const nftDataForDatabase: { domainIds: string[] } = { domainIds: [] };
+
+  for (const modified of modifiedNfts) {
+    nftDataForDatabase.domainIds.push(modified.id);
+  }
+
+  const metadataServiceUrl = env
+    .get("METADATA_SERVICE_URL")
+    .default("https://metadata-service-api.azurewebsites.net/api/metadata")
+    .asString();
+
+  const serviceData: PostReturn = (
+    await axios.post(metadataServiceUrl, nftDataForDatabase)
+  ).data;
+
+  const serviceNfts: NftData[] = [];
+
+  modifiedNfts.forEach((value) => {
+    const serviceMetadata = serviceData.metadata[value.id];
+    if (serviceMetadata !== undefined) {
+      serviceNfts.push({ id: value.id, metadata: serviceMetadata });
+    }
+  });
+
+  const diff = compareNftGroups(serviceNfts, modifiedNfts, logger);
   return diff;
 };
