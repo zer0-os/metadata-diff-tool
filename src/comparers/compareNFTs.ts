@@ -11,6 +11,7 @@ import {
   NftFile,
   nftArraySchema,
   Metadata,
+  MetadataServiceResponse,
 } from "../types";
 import axios from "axios";
 import * as env from "env-var";
@@ -176,11 +177,6 @@ export const compareNftFiles = (
   return diff;
 };
 
-interface PostReturn {
-  warnings: string;
-  metadata: Map<Metadata>;
-}
-
 export const compareNftsToMetadataService = async (
   modifiedNfts: Nft[],
   logger: Logger
@@ -196,9 +192,19 @@ export const compareNftsToMetadataService = async (
     .default("https://metadata-service-api.azurewebsites.net/api/metadata")
     .asString();
 
-  const serviceData: PostReturn = (
-    await axios.post(metadataServiceUrl, nftDataForDatabase)
-  ).data;
+  let postResponse;
+  while (true) {
+    postResponse = await axios.post(metadataServiceUrl, nftDataForDatabase);
+    if (postResponse.status === 200) {
+      break;
+    } else if (postResponse.status !== 504) {
+      throw new Error(
+        `Post to [${metadataServiceUrl}] failed. Error [${postResponse.data}]`
+      );
+    }
+  }
+
+  const serviceData: MetadataServiceResponse = postResponse.data;
 
   const serviceNfts: Nft[] = [];
 
