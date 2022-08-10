@@ -4,11 +4,10 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import {
   compareNftFiles,
-  compareNftFileToDatabase,
   compareNftsToMetadataService,
+  readNftFile,
 } from "./comparers";
-import { updateDatabase } from "./databaseAccess";
-import { Logger, Maybe, NftBatchDiff, NftData } from "./types";
+import { Logger, Maybe, NftBatchDiff, Nft } from "./types";
 
 const writeDiffToFile = (
   diff: NftBatchDiff,
@@ -32,10 +31,8 @@ const getDiffAndWriteToFile = async (
 ) => {
   try {
     if (!originalFile) {
-      const domains: { nfts: NftData[] } = JSON.parse(
-        fs.readFileSync(changedFile).toString()
-      );
-      const diff = await compareNftsToMetadataService(domains.nfts, logger);
+      const fileNfts = readNftFile(changedFile);
+      const diff = await compareNftsToMetadataService(fileNfts, logger);
       writeDiffToFile(diff, outFile, logger);
     } else {
       const diff = compareNftFiles(originalFile, changedFile, logger);

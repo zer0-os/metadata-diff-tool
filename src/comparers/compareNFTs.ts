@@ -1,15 +1,14 @@
 import Ajv from "ajv";
 import * as fs from "fs";
-import { compareMetadataGeneric } from "./";
-import { getNftsFromDatabase } from "../databaseAccess";
+import { compareMetadataGeneric } from ".";
 import {
   AjvError,
   Logger,
   Map,
   NftBatchDiff,
-  NftData,
+  Nft,
   NftDiff,
-  NftFileData,
+  NftFile,
   nftArraySchema,
   Metadata,
 } from "../types";
@@ -19,11 +18,7 @@ import * as env from "env-var";
 const ajv = new Ajv();
 const nftArraySchemaValidation = ajv.compile(nftArraySchema);
 
-const compareNfts = (
-  original: NftData,
-  modified: NftData,
-  logger: Logger
-): NftDiff => {
+const compareNfts = (original: Nft, modified: Nft, logger: Logger): NftDiff => {
   logger(
     `Validating that [${original.id}] and [${modified.id}] are the same NFT`
   );
@@ -59,8 +54,8 @@ const compareNfts = (
   return diff;
 };
 
-const readNftFile = (file: string): NftData[] => {
-  const fileNfts: NftFileData = JSON.parse(fs.readFileSync(file).toString());
+export const readNftFile = (file: string): Nft[] => {
+  const fileNfts: NftFile = JSON.parse(fs.readFileSync(file).toString());
   if (!nftArraySchemaValidation(fileNfts.nfts)) {
     throw new AjvError(
       `Invalid nft array in [${file}]`,
@@ -72,8 +67,8 @@ const readNftFile = (file: string): NftData[] => {
 };
 
 export const compareNftGroups = (
-  originalDataArray: NftData[],
-  modifiedDataArray: NftData[],
+  originalDataArray: Nft[],
+  modifiedDataArray: Nft[],
   logger: Logger
 ): NftBatchDiff => {
   if (originalDataArray.length < modifiedDataArray.length) {
@@ -118,7 +113,7 @@ export const compareNftGroups = (
 
   const batchDiff: NftBatchDiff = { summary: {}, diffs: [] };
 
-  const originalsMap: Map<NftData> = {};
+  const originalsMap: Map<Nft> = {};
 
   logger("Creating Map of original data");
   // add each original NFT to a map, throw if there are duplicates
@@ -181,40 +176,13 @@ export const compareNftFiles = (
   return diff;
 };
 
-export const compareNftGroupToDatabase = async (
-  modifiedNfts: NftData[],
-  logger: Logger
-): Promise<NftBatchDiff> => {
-  const nftDataForDatabase: { id: string }[] = [];
-
-  for (const modified of modifiedNfts) {
-    nftDataForDatabase.push({
-      id: modified.id,
-    });
-  }
-
-  const databaseNfts = await getNftsFromDatabase(nftDataForDatabase, logger);
-
-  const diff = compareNftGroups(databaseNfts, modifiedNfts, logger);
-  return diff;
-};
-
-export const compareNftFileToDatabase = async (
-  modifiedFile: string,
-  logger: Logger
-): Promise<NftBatchDiff> => {
-  const modifiedNfts = readNftFile(modifiedFile);
-  const diff = await compareNftGroupToDatabase(modifiedNfts, logger);
-  return diff;
-};
-
 interface PostReturn {
   warnings: string;
   metadata: Map<Metadata>;
 }
 
 export const compareNftsToMetadataService = async (
-  modifiedNfts: NftData[],
+  modifiedNfts: Nft[],
   logger: Logger
 ): Promise<NftBatchDiff> => {
   const nftDataForDatabase: { domainIds: string[] } = { domainIds: [] };
@@ -232,7 +200,7 @@ export const compareNftsToMetadataService = async (
     await axios.post(metadataServiceUrl, nftDataForDatabase)
   ).data;
 
-  const serviceNfts: NftData[] = [];
+  const serviceNfts: Nft[] = [];
 
   modifiedNfts.forEach((value) => {
     const serviceMetadata = serviceData.metadata[value.id];
