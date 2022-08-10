@@ -1,7 +1,7 @@
 import { ValidateFunction } from "ajv";
 
-export class AjvError<T> {
-  constructor(description: string, ajvVerification: ValidateFunction<T>) {
+export class AjvError {
+  constructor(description: string, ajvVerification: ValidateFunction) {
     this.description = description;
 
     if (!ajvVerification.errors) {

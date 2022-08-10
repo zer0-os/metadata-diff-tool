@@ -1,2 +1,2 @@
-export * from "./compareNFTs";
+export * from "./compareNfts";
 export * from "./compareMetadata";
