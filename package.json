@@ -1,6 +1,6 @@
 {
   "name": "@zero-tech/metadata-diff-tool",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Zer0 Tech",
   "license": "MIT",
   "description": "A diff tool that shows the difference between two provided NFT metadata's",
