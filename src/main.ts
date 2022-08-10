@@ -4,7 +4,7 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import {
   compareNftFiles,
-  compareNftsToMetadataService,
+  compareNftGroupToMetadataService,
   readNftFile,
 } from "./comparers";
 import { Logger, Maybe, NftBatchDiff, Nft } from "./types";
@@ -32,7 +32,7 @@ const getDiffAndWriteToFile = async (
   try {
     if (!originalFile) {
       const fileNfts = readNftFile(changedFile);
-      const diff = await compareNftsToMetadataService(fileNfts, logger);
+      const diff = await compareNftGroupToMetadataService(fileNfts, logger);
       writeDiffToFile(diff, outFile, logger);
     } else {
       const diff = compareNftFiles(originalFile, changedFile, logger);

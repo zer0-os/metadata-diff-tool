@@ -1,6 +1,6 @@
 import Ajv from "ajv";
 import * as fs from "fs";
-import { compareMetadataGeneric } from ".";
+import { compareMetadataGeneric } from "..";
 import {
   AjvError,
   Logger,
@@ -176,7 +176,7 @@ export const compareNftFiles = (
   return diff;
 };
 
-export const compareNftsToMetadataService = async (
+export const compareNftGroupToMetadataService = async (
   modifiedNfts: Nft[],
   logger: Logger
 ): Promise<NftBatchDiff> => {
