@@ -1,6 +1,6 @@
 import Ajv from "ajv";
 import * as fs from "fs";
-import { compareMetadataGeneric } from "..";
+import { compareMetadataGeneric } from "./compareMetadata";
 import {
   AjvError,
   Logger,
