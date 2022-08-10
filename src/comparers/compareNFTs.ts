@@ -10,7 +10,6 @@ import {
   NftDiff,
   NftFile,
   nftArraySchema,
-  Metadata,
   MetadataServiceResponse,
 } from "../types";
 import axios from "axios";
